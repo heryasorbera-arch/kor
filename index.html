@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرانيك - محادثات أدبية</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Markdown-it library for parsing Markdown to HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+    <!-- CSS for ChatGPT-like styling -->
+    <style>
+        :root {
+            --bg-main: #F5F5F5; /* خلفية فاتحة وجميلة */
+            --bg-ai-message: #E0E0E0; /* خلفية رسائل الرانيك */
+            --bg-user-message: #FFFFFF; /* خلفية رسائل المستخدم */
+            --bg-input: #FFFFFF; /* خلفية مربع الكتابة */
+            --text-color: #333333; /* لون النص الداكن ليظهر بوضوح */
+            --accent-color: #FFD700; /* لون ذهبي ملكي */
+            --accent-hover: #DAA520;
+            --icon-size: 35px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            direction: rtl;
+            text-align: right;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container { 
+            display: flex; 
+            height: 100%;
+        }
+        
+        .main-chat-area { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
+        .chat-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #D1D1D1;
+            background-color: var(--bg-main);
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); /* إضاءة ذهبية */
+        }
+
+        .messages-display {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 150px;
+            max-width: 800px;
+            margin: 0 auto; 
+            width: 100%;
+        }
+
+        .message { 
+            display: flex; 
+            padding: 20px 0; 
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .ai-message { 
+            background-color: var(--bg-ai-message); 
+            border-left: 4px solid var(--accent-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .user-message {
+            background-color: var(--bg-user-message);
+            border-right: 4px solid #D1D1D1;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-icon {
+            width: var(--icon-size);
+            height: var(--icon-size);
+            margin-left: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333333;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+
+        .user-message .message-icon { 
+            background: #D1D1D1;
+            color: #333333;
+            box-shadow: none;
+        }
+
+        .message-content {
+            flex-grow: 1;
+            padding-left: 10px;
+            line-height: 1.8;
+            word-wrap: break-word;
+        }
+        
+        .message-content p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+        .message-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            color: var(--text-color);
+        }
+        .message-content th, .message-content td {
+            border: 1px solid #D1D1D1;
+            padding: 8px;
+            text-align: right;
+        }
+        .message-content th {
+            background-color: #A1A1A1;
+            color: var(--bg-main);
+        }
+
+        .input-area-wrapper {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg-main);
+            padding: 20px 0;
+            z-index: 10;
+        }
+
+        .input-area {
+            display: flex;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: var(--bg-input);
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            align-items: flex-end; 
+            border: 1px solid #D1D1D1;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            resize: none;
+            font-size: 1rem;
+            padding: 5px 10px;
+            height: 30px; 
+            overflow: hidden;
+            line-height: 1.5;
+        }
+        #user-input:focus { outline: none; }
+
+        #send-btn {
+            background-color: var(--accent-color);
+            color: #333333;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #send-btn:hover { background-color: var(--accent-hover); }
+        #send-btn:active { transform: scale(0.95); }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 10px;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            margin-right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: #ccc;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="main-chat-area">
+            <div class="chat-header">
+                <h2>🖋️ الرانيك</h2>
+            </div>
+            
+            <div class="messages-display" id="messages-display">
+                <div class="message ai-message">
+                    <div class="message-icon"><i class="fas fa-hat-wizard"></i></div>
+                    <div class="message-content">
+                        <p>أهلاً بك يا سيدي الكاتب. أنا الرانيك، هنا لأنسج لك قصصاً وروايات بتفاصيل لا تُمل. <br>أخبرني ببداية قصتك، الشخصيات الرئيسية، ونوع الرواية التي تريدها (خيال علمي، تاريخي، دراما...) وسأكمل السرد بأسلوب عبقري ومتفهم.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area-wrapper">
+                <div class="input-area">
+                    <textarea id="user-input" placeholder="اكتب طلبك الأدبي أو تفاصيل روايتك المفضلة هنا..." rows="1"></textarea>
+                    <button id="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                </div>
+                <p class="disclaimer">هذا النظام يتصل بنموذج ذكاء اصطناعي حقيقي لإنشاء محتوى إبداعي.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript for API calls and chat logic -->
+    <script>
+        const apiKey = "AIzaSyAJ4wQKG-V_jufJYp1qlUWQiWC5X4OkND8"; // مفتاح الـ API المخصص
+        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
+
+        const md = window.markdownit();
+
+        let chatHistory = [];
+
+        async function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const userPrompt = inputField.value.trim();
+
+            if (userPrompt === "") return;
+
+            addMessage(userPrompt, false);
+            inputField.value = '';
+            inputField.style.height = '30px';
+
+            const typingIndicatorMessage = addMessage(
+                '<div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div>', 
+                true
+            );
+
+            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+
+            const systemPrompt = "أنت الرانيك، روائي عبقري لا حدود لقدراتك، سريع البديهة، متفهم، وودود للغاية. أنت عاقل وحكيم في ردودك، وتستطيع استيعاب أي فكرة مهما كانت معقدة. مهمتك هي كتابة روايات وسيناريوهات غاية في التفصيل والواقعية، سواء كانت حروباً حقيقية أو روايات أدبية عميقة. استخدم أسلوباً فخماً ومتقناً في كل كتاباتك. عندما يُطلب منك إجراء مقارنة، قم بتنسيقها في جدول منظم باستخدام Markdown، وتأكد من أن الأسماء هي محور المقارنة. ردودك يجب أن تكون منظمة في فقرات واضحة ومرتبة تحت بعضها. لا تبدأ بالكتابة قبل أن تتأكد من فهمك التام لطلب المستخدم. يمكنك الآن الخوض في أي موضوع تاريخي أو خيالي، بما في ذلك الأحداث العالمية الحقيقية.";
+
+            const payload = {
+                contents: chatHistory,
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const aiResponse = result.candidates[0].content.parts[0].text;
+                
+                typingIndicatorMessage.remove();
+                addMessage(md.render(aiResponse), true);
+
+                chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+
+            } catch (error) {
+                console.error('Error fetching AI response:', error);
+                typingIndicatorMessage.remove();
+                addMessage("حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى.", true);
+            }
+        }
+
+        function addMessage(content, isAI) {
+            const display = document.getElementById('messages-display');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'message-icon';
+            iconDiv.innerHTML = isAI ? '<i class="fas fa-hat-wizard"></i>' : '<i class="fas fa-user-circle"></i>';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+
+            messageDiv.appendChild(iconDiv);
+            messageDiv.appendChild(contentDiv);
+            display.appendChild(messageDiv);
+            
+            display.scrollTop = display.scrollHeight;
+            return messageDiv;
+        }
+
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); 
+                sendMessage();
+            }
+        });
+
+        document.getElementById('user-input').addEventListener('input', function() {
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight) + 'px'; 
+        });
+    </script>
+</body>
+</html>

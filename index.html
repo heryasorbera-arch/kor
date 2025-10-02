@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Markdown-it library for parsing Markdown to HTML -->
     <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote/dist/markdown-it-footnote.min.js"></script>
 
     <!-- CSS for ChatGPT-like styling -->
     <style>
@@ -78,6 +79,7 @@
             border-left: 4px solid var(--accent-color);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             animation: fadeIn 0.5s ease-in-out;
+            position: relative;
         }
         .user-message {
             background-color: var(--bg-user-message);
@@ -122,20 +124,34 @@
             margin-bottom: 1em;
             text-align: justify;
         }
+        
+        /* Updated table CSS for a modern, beautiful design with thin lines */
         .message-content table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 20px;
             color: var(--text-color);
+            border-radius: 12px;
+            overflow: hidden; /* Ensures rounded corners on all sides */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
         .message-content th, .message-content td {
-            border: 1px solid #D1D1D1;
-            padding: 8px;
+            padding: 15px;
             text-align: right;
+            border: 1px solid #EAEAEA; /* Thin, elegant lines */
         }
         .message-content th {
-            background-color: #A1A1A1;
-            color: var(--bg-main);
+            background-color: #333;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        .message-content tr:nth-child(even) {
+            background-color: #F8F8F8; /* Alternating row color */
+        }
+        .message-content tr:hover td {
+            background-color: #EFEFEF;
         }
 
         .input-area-wrapper {
@@ -145,6 +161,29 @@
             background: var(--bg-main);
             padding: 20px 0;
             z-index: 10;
+        }
+
+        .feature-controls {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: right;
+            padding-bottom: 10px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        #image-btn {
+            background-color: #333; /* Dark background */
+            color: var(--accent-color); /* Gold text */
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        #image-btn:hover {
+            background-color: #555;
         }
 
         .input-area {
@@ -214,6 +253,54 @@
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1.0); }
         }
+
+        .ai-feature-buttons {
+            position: absolute;
+            bottom: 5px;
+            left: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .tts-button {
+            background-color: #333;
+            color: var(--accent-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+        
+        .tts-button:hover {
+            background-color: #555;
+        }
+
+        .image-container {
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .loading-image {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            height: 300px;
+            border-radius: 12px;
+            color: #333;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -228,11 +315,21 @@
                     <div class="message-icon"><i class="fas fa-hat-wizard"></i></div>
                     <div class="message-content">
                         <p>أهلاً بك يا سيدي الكاتب. أنا الرانيك، هنا لأنسج لك قصصاً وروايات بتفاصيل لا تُمل. <br>أخبرني ببداية قصتك، الشخصيات الرئيسية، ونوع الرواية التي تريدها (خيال علمي، تاريخي، دراما...) وسأكمل السرد بأسلوب عبقري ومتفهم.</p>
+                        <div class="ai-feature-buttons">
+                            <button class="tts-button" onclick="textToSpeech(this)">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="input-area-wrapper">
+                <div class="feature-controls">
+                    <button id="image-btn" onclick="promptForImage()" title="توليد صورة للمشهد">
+                        <i class="fas fa-magic"></i> توليد صورة للمشهد
+                    </button>
+                </div>
                 <div class="input-area">
                     <textarea id="user-input" placeholder="اكتب طلبك الأدبي أو تفاصيل روايتك المفضلة هنا..." rows="1"></textarea>
                     <button id="send-btn" onclick="sendMessage()">
@@ -246,31 +343,47 @@
     
     <!-- JavaScript for API calls and chat logic -->
     <script>
-        const apiKey = "AIzaSyAJ4wQKG-V_jufJYp1qlUWQiWC5X4OkND8"; // مفتاح الـ API المخصص
-        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
+        // API key and URL for the Gemini model
+        const apiKey = "AIzaSyCN7xfp3Jzsb9CzQWzk9Tiyi-RfbSDiAUg";
+        const textApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
+        const ttsApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=" + apiKey;
+        // API for image generation (Imagen 3.0)
+        const imageApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=" + apiKey;
 
         const md = window.markdownit();
 
         let chatHistory = [];
 
+        // ******** النظام الأساسي للرانيك - قواعد ثابتة لا تتغير ********
+        // هذا المتغير يحتوي على القواعد التي تجعل الرانيك دقيقاً وواقعياً في سرد القصص العسكرية والتاريخية.
+        // تم تثبيته بناءً على طلب المستخدم لضمان عدم وجود أي خانات فارغة أو بيانات غير واقعية.
+        const systemPrompt = "أنت الرانيك، روائي عبقري ومؤرخ دقيق. مهمتك هي كتابة روايات وسيناريوهات غاية في الواقعية والتفصيل، مع التركيز على الدقة التاريخية المطلقة. عندما يُطلب منك وصف حدث تاريخي، مثل حرب، يجب أن يكون سردك مطابقاً للحقيقة تماماً، بما في ذلك التفاصيل الدقيقة مثل المعدات العسكرية، الصفقات، أو حتى تحركات الجيوش. يجب أن تكون ذكياً جداً ومتفهماً لكل طلب، وأن تستطيع استنتاج التفاصيل الواقعية حتى لو لم يذكرها المستخدم صراحة. استخدم أسلوباً فخماً ومتقناً في كل كتاباتك. عندما يُطلب منك إجراء مقارنة، قم بتنسيقها في جدول أنيق وعصري باستخدام Markdown. **الأمر الأكثر أهمية هو أن تكون المقارنات واقعية ودقيقة جداً، وتتضمن أرقامًا وبيانات محددة لكل خانة في الجدول، ولا تترك أي خانة فارغة تحت أي ظرف من الظروف**. إذا كانت البيانات غير متاحة، قم بوضع قيمة تقديرية واقعية ومنطقية تتناسب مع سياق القصة. **افصل كل نقطة مقارنة في سطر منفصل وواضح**، مثل: 'القوة البشرية', 'القوات العاملة', 'القوات الاحتياطية', 'الميزانية الدفاعية', 'القوات البرية', 'القوات الجوية', 'القوات البحرية', و'القدرات التكنولوجية'. هذا يضمن أعلى مستوى من الدقة والذكاء في العرض. ردودك يجب أن تكون سريعة جداً، منظمة في فقرات واضحة ومرتبة تحت بعضها. لا تبدأ بالكتابة قبل أن تتأكد من فهمك التام لطلب المستخدم.";
+        // *************************************************************
+
         async function sendMessage() {
             const inputField = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
             const userPrompt = inputField.value.trim();
 
             if (userPrompt === "") return;
 
+            // Display user message
             addMessage(userPrompt, false);
             inputField.value = '';
             inputField.style.height = '30px';
 
+            // Show typing indicator and disable input
             const typingIndicatorMessage = addMessage(
                 '<div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div>', 
-                true
+                true,
+                true // Skip features (TTS) for loading message
             );
+            sendBtn.disabled = true;
+            inputField.disabled = true;
+            document.getElementById('image-btn').disabled = true;
 
+            // Add the user's message to the chat history
             chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
-
-            const systemPrompt = "أنت الرانيك، روائي عبقري لا حدود لقدراتك، سريع البديهة، متفهم، وودود للغاية. أنت عاقل وحكيم في ردودك، وتستطيع استيعاب أي فكرة مهما كانت معقدة. مهمتك هي كتابة روايات وسيناريوهات غاية في التفصيل والواقعية، سواء كانت حروباً حقيقية أو روايات أدبية عميقة. استخدم أسلوباً فخماً ومتقناً في كل كتاباتك. عندما يُطلب منك إجراء مقارنة، قم بتنسيقها في جدول منظم باستخدام Markdown، وتأكد من أن الأسماء هي محور المقارنة. ردودك يجب أن تكون منظمة في فقرات واضحة ومرتبة تحت بعضها. لا تبدأ بالكتابة قبل أن تتأكد من فهمك التام لطلب المستخدم. يمكنك الآن الخوض في أي موضوع تاريخي أو خيالي، بما في ذلك الأحداث العالمية الحقيقية.";
 
             const payload = {
                 contents: chatHistory,
@@ -278,27 +391,260 @@
             };
             
             try {
-                const response = await fetch(apiUrl, {
+                // Send the request to the Gemini API
+                const response = await fetch(textApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
-                const aiResponse = result.candidates[0].content.parts[0].text;
                 
-                typingIndicatorMessage.remove();
-                addMessage(md.render(aiResponse), true);
-
-                chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                // Robust check to prevent errors if the API response is not as expected
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                    const aiResponse = result.candidates[0].content.parts[0].text;
+                    
+                    // Remove the typing indicator and add the AI's response
+                    typingIndicatorMessage.remove();
+                    addMessage(md.render(aiResponse), true);
+                    chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                } else {
+                    typingIndicatorMessage.remove();
+                    addMessage("عذراً، لم يتمكن الرانيك من إرسال رد. قد تكون هناك مشكلة في البيانات التي أرسلتها أو في الاتصال. يرجى المحاولة مرة أخرى.", true);
+                }
 
             } catch (error) {
                 console.error('Error fetching AI response:', error);
                 typingIndicatorMessage.remove();
                 addMessage("حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى.", true);
+            } finally {
+                // Re-enable input and button regardless of success or failure
+                sendBtn.disabled = false;
+                inputField.disabled = false;
+                document.getElementById('image-btn').disabled = false;
             }
         }
 
-        function addMessage(content, isAI) {
+        /**
+         * Converts base64 encoded PCM audio data to a WAV Blob.
+         * @param {string} base64Data The base64 encoded audio data.
+         * @param {number} sampleRate The sample rate of the audio.
+         * @returns {Blob} A Blob containing the WAV audio data.
+         */
+        function pcmToWav(base64Data, sampleRate) {
+            const audioData = atob(base64Data);
+            const pcmData = new Int16Array(audioData.length / 2);
+
+            for (let i = 0; i < audioData.length / 2; i++) {
+                // The API returns little-endian 16-bit PCM
+                const byte1 = audioData.charCodeAt(2 * i);
+                const byte2 = audioData.charCodeAt(2 * i + 1);
+                pcmData[i] = (byte2 << 8) | byte1;
+            }
+            
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const blockAlign = numChannels * (bitsPerSample / 8);
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = pcmData.length * (bitsPerSample / 8);
+
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            // WAV header
+            let offset = 0;
+            const writeString = (str) => {
+                for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+                offset += str.length;
+            };
+
+            writeString('RIFF'); // ChunkID
+            view.setUint32(offset, 36 + dataSize, true); // ChunkSize
+            offset += 4;
+            writeString('WAVE'); // Format
+            writeString('fmt '); // Subchunk1ID
+            view.setUint32(offset, 16, true); // Subchunk1Size
+            offset += 4;
+            view.setUint16(offset, 1, true); // AudioFormat (1=PCM)
+            offset += 2;
+            view.setUint16(offset, numChannels, true); // NumChannels
+            offset += 2;
+            view.setUint32(offset, sampleRate, true); // SampleRate
+            offset += 4;
+            view.setUint32(offset, byteRate, true); // ByteRate
+            offset += 4;
+            view.setUint16(offset, blockAlign, true); // BlockAlign
+            offset += 2;
+            view.setUint16(offset, bitsPerSample, true); // BitsPerSample
+            offset += 2;
+            writeString('data'); // Subchunk2ID
+            view.setUint32(offset, dataSize, true); // Subchunk2Size
+            offset += 4;
+
+            // Write PCM data
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(offset, pcmData[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        async function textToSpeech(button) {
+            // Get the text content from the message, excluding the feature buttons
+            const messageContentElement = button.closest('.message-content');
+            let messageContent = messageContentElement.textContent.trim();
+            
+            // If the element has a features container, remove its text content from the TTS prompt
+            const featureButtons = messageContentElement.querySelector('.ai-feature-buttons');
+            if (featureButtons) {
+                // Clone the content element to remove feature buttons before TTS
+                const tempClone = messageContentElement.cloneNode(true);
+                tempClone.querySelector('.ai-feature-buttons')?.remove();
+                messageContent = tempClone.textContent.trim();
+            }
+
+            if (!messageContent) return;
+
+            button.disabled = true;
+            const icon = button.querySelector('i');
+            icon.classList.remove('fa-volume-up');
+            icon.classList.add('fa-spinner', 'fa-spin');
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: messageContent }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Kore" }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            try {
+                const response = await fetch(ttsApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
+                    const wavBlob = pcmToWav(audioData, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                } else {
+                    console.error("Invalid audio data received.");
+                }
+            } catch (error) {
+                console.error('Error with TTS:', error);
+            } finally {
+                icon.classList.remove('fa-spinner', 'fa-spin');
+                icon.classList.add('fa-volume-up');
+                button.disabled = false;
+            }
+        }
+
+        async function generateImage(userPrompt) {
+            // Enhancing prompt to ensure high-quality, cinematic, and detailed output
+            const enhancedPrompt = userPrompt + ", cinematic, highly detailed, fantasy digital painting, 4k";
+
+            const payload = { 
+                instances: [{ prompt: enhancedPrompt }],
+                parameters: { "sampleCount": 1 } 
+            };
+            
+            let attempts = 0;
+            const maxAttempts = 5;
+            let delay = 1000; 
+
+            while (attempts < maxAttempts) {
+                try {
+                    const response = await fetch(imageApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429) { 
+                        attempts++;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; 
+                        continue;
+                    }
+
+                    const result = await response.json();
+                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    } else {
+                        console.error("Image generation failed with no base64 data:", result);
+                        return null;
+                    }
+                } catch (error) {
+                    attempts++;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                    if (attempts >= maxAttempts) throw error; 
+                }
+            }
+            return null;
+        }
+
+        async function promptForImage() {
+            const prompt = window.prompt("ما هو المشهد الذي تريد أن يرسمه الرانيك؟ (مثال: سفينة فضاء تحلق فوق كوكب أحمر في عاصفة رملية، فن رقمي)");
+            if (!prompt || prompt.trim() === "") return;
+
+            addMessage(`طلب صورة: ${prompt}`, false);
+
+            const loadingMessage = addMessage(
+                '<div class="loading-image"><i class="fas fa-palette fa-spin fa-2x"></i><p style="margin-right: 15px; margin-top: 15px;"> الرانيك يرسم المشهد... قد يستغرق الأمر بعض الوقت. </p></div>',
+                true,
+                true // isSpecialMessage flag for the loading state
+            );
+            
+            // Disable input while generating image
+            const sendBtn = document.getElementById('send-btn');
+            const inputField = document.getElementById('user-input');
+            const imageBtn = document.getElementById('image-btn');
+            sendBtn.disabled = true;
+            inputField.disabled = true;
+            imageBtn.disabled = true;
+
+            try {
+                const imageUrl = await generateImage(prompt);
+                
+                // Remove loading message
+                loadingMessage.remove();
+
+                if (imageUrl) {
+                    addMessage(`<p>رسم الرانيك هذا المشهد بناءً على طلبك:</p><div class="image-container"><img src="${imageUrl}" alt="${prompt}"></div>`, true);
+                } else {
+                    addMessage("عذراً، لم يتمكن الرانيك من توليد الصورة المطلوبة. يرجى محاولة وصف آخر.", true);
+                }
+
+            } catch (error) {
+                console.error("Error generating image:", error);
+                loadingMessage.remove();
+                addMessage("حدث خطأ أثناء توليد الصورة. يرجى المحاولة مرة أخرى.", true);
+            } finally {
+                // Re-enable controls
+                sendBtn.disabled = false;
+                inputField.disabled = false;
+                imageBtn.disabled = false;
+            }
+        }
+        
+        // Function to add messages to the chat display
+        function addMessage(content, isAI, skipFeatures = false) {
             const display = document.getElementById('messages-display');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
@@ -309,16 +655,31 @@
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            contentDiv.innerHTML = content;
+            
+            // Add TTS button to AI messages, unless skipped (like for loading indicator)
+            if (isAI && !skipFeatures) { 
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'ai-feature-buttons';
+                const ttsButton = document.createElement('button');
+                ttsButton.className = 'tts-button';
+                ttsButton.innerHTML = '✨ <i class="fas fa-volume-up"></i>';
+                ttsButton.onclick = () => textToSpeech(ttsButton);
+                buttonContainer.appendChild(ttsButton);
+                contentDiv.appendChild(buttonContainer);
+            }
 
+            contentDiv.innerHTML = contentDiv.innerHTML + content; // Append content after buttons if any
+            
             messageDiv.appendChild(iconDiv);
             messageDiv.appendChild(contentDiv);
             display.appendChild(messageDiv);
             
+            // Scroll to the bottom of the chat
             display.scrollTop = display.scrollHeight;
             return messageDiv;
         }
 
+        // Event listener for sending a message on 'Enter' key press
         document.getElementById('user-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault(); 
@@ -326,6 +687,7 @@
             }
         });
 
+        // Auto-resize the input textarea based on content
         document.getElementById('user-input').addEventListener('input', function() {
             this.style.height = 'auto'; 
             this.style.height = (this.scrollHeight) + 'px'; 

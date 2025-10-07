@@ -157,7 +157,8 @@
             bottom: 0;
             width: 100%;
             background: linear-gradient(to top, var(--bg-main) 90%, rgba(249, 250, 251, 0.8) 100%);
-            padding: 15px 0 25px 0;
+            /* تم التعديل: إضافة هامش أفقي لضمان المسافة على حواف الشاشة */
+            padding: 15px 20px 25px 20px; 
             z-index: 100;
         }
 
@@ -166,8 +167,7 @@
             margin: 0 auto;
             text-align: right;
             padding-bottom: 10px;
-            padding-left: 20px;
-            padding-right: 20px;
+            /* تم التعديل: إزالة الهوامش الأفقية المتعارضة */
         }
 
         #image-btn {
@@ -185,15 +185,14 @@
         .input-area {
             display: flex;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 0 auto; /* هذا يضمن التوسيط */
             padding: 10px;
             background-color: var(--bg-input);
             border-radius: var(--radius-main);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
             align-items: flex-end; 
             border: 1px solid #D1D5DB;
-            margin-left: 20px;
-            margin-right: 20px;
+            /* تم التعديل: إزالة الهوامش الأفقية المتعارضة */
         }
 
         #user-input {
@@ -309,9 +308,8 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Mobile Adjustments */
+        /* Mobile Adjustments - Removed conflicting margins */
         @media (max-width: 600px) {
-            .input-area, .feature-controls { margin-left: 10px; margin-right: 10px; }
             .message { padding-left: 10px; padding-right: 10px; }
             .message-icon { margin-left: 10px; }
         }

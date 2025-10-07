@@ -10,60 +10,59 @@
     <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote/dist/markdown-it-footnote.min.js"></script>
 
-    <!-- CSS for ChatGPT-like styling -->
+    <!-- CSS for ultra-modern, high-contrast, developed chat styling -->
     <style>
         :root {
-            --bg-main: #F5F5F5; /* خلفية فاتحة وجميلة */
-            --bg-ai-message: #E0E0E0; /* خلفية رسائل الرانيك */
-            --bg-user-message: #FFFFFF; /* خلفية رسائل المستخدم */
-            --bg-input: #FFFFFF; /* خلفية مربع الكتابة */
-            --text-color: #333333; /* لون النص الداكن ليظهر بوضوح */
-            --accent-color: #FFD700; /* لون ذهبي ملكي */
-            --accent-hover: #DAA520;
+            --bg-main: #F9FAFB; /* خلفية ناعمة جداً */
+            --bg-ai-container: #FFFFFF; /* خلفية رسائل الرانيك (واضحة) */
+            --bg-input: #FFFFFF; /* خلفية شريط الإدخال */
+            --text-color: #111827; /* نص داكن جداً لقراءة فائقة */
+            --accent-color: #10B981; /* لون بحري متطور */
+            --accent-hover: #059669;
             --icon-size: 35px;
+            --radius-main: 12px;
         }
 
+        /* خط نظيف وعصري يدعم العربية بوضوح */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Arial, sans-serif;
+            transition: all 0.2s ease-in-out;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-color);
             direction: rtl;
             text-align: right;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .chat-container { 
-            display: flex; 
-            height: 100%;
-        }
+        .chat-container { flex-grow: 1; display: flex; flex-direction: column; width: 100%; }
+        .main-chat-area { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
         
-        .main-chat-area { 
-            flex-grow: 1; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-        }
         .chat-header {
             padding: 20px;
             text-align: center;
-            border-bottom: 1px solid #D1D1D1;
             background-color: var(--bg-main);
-            color: var(--accent-color);
-            font-size: 1.5rem;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); /* إضاءة ذهبية */
+            color: var(--text-color);
+            font-size: 1.6rem;
+            font-weight: 700;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+            position: sticky;
+            top: 0;
+            z-index: 20;
         }
 
         .messages-display {
             flex-grow: 1;
             overflow-y: auto;
             padding-bottom: 150px;
+            padding-top: 10px;
             max-width: 800px;
             margin: 0 auto; 
             width: 100%;
@@ -71,52 +70,50 @@
 
         .message { 
             display: flex; 
+            align-items: flex-start;
             padding: 20px 0; 
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            border-top: 1px solid #E5E7EB; /* خط فاصل خفيف جداً */
+            margin-bottom: 0;
+            padding-left: 20px;
+            padding-right: 20px;
         }
-        .ai-message { 
-            background-color: var(--bg-ai-message); 
-            border-left: 4px solid var(--accent-color);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            animation: fadeIn 0.5s ease-in-out;
-            position: relative;
-        }
-        .user-message {
-            background-color: var(--bg-user-message);
-            border-right: 4px solid #D1D1D1;
-            animation: fadeIn 0.5s ease-in-out;
+        
+        /* AI Message Container */
+        .ai-message {
+            background-color: var(--bg-ai-container);
+            border-bottom: 1px solid #E5E7EB;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* User Message Container */
+        .user-message {
+            background-color: var(--bg-main); /* لون الخلفية الرئيسي */
+            color: var(--text-color);
+            border-bottom: 1px solid #E5E7EB;
         }
 
         .message-icon {
             width: var(--icon-size);
             height: var(--icon-size);
-            margin-left: 20px;
-            border-radius: 50%;
-            background: var(--accent-color);
+            border-radius: 8px; /* مربع ناعم بدلاً من دائرة */
+            background: var(--text-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #333333;
+            color: #FFFFFF;
             font-size: 18px;
             flex-shrink: 0;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            margin-left: 20px;
         }
 
         .user-message .message-icon { 
-            background: #D1D1D1;
-            color: #333333;
-            box-shadow: none;
+            background: var(--accent-color);
         }
 
         .message-content {
             flex-grow: 1;
             padding-left: 10px;
-            line-height: 1.8;
+            line-height: 1.7;
+            font-size: 1.05rem; /* حجم خط مريح ومطور */
             word-wrap: break-word;
         }
         
@@ -125,42 +122,43 @@
             text-align: justify;
         }
         
-        /* Updated table CSS for a modern, beautiful design with thin lines */
+        /* Table Styling - Clean and Highly Legible */
         .message-content table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 25px;
             color: var(--text-color);
-            border-radius: 12px;
-            overflow: hidden; /* Ensures rounded corners on all sides */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-main);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E5E7EB;
         }
         .message-content th, .message-content td {
-            padding: 15px;
+            padding: 14px 18px;
             text-align: right;
-            border: 1px solid #EAEAEA; /* Thin, elegant lines */
+            border: 1px solid #F3F4F6; /* خطوط داخلية أفتح */
         }
         .message-content th {
-            background-color: #333;
-            color: var(--accent-color);
-            font-weight: bold;
-            font-size: 1.1rem;
-            border-bottom: 2px solid var(--accent-color);
+            background-color: var(--accent-color);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 1rem;
         }
         .message-content tr:nth-child(even) {
-            background-color: #F8F8F8; /* Alternating row color */
+            background-color: #F9FAFB;
         }
         .message-content tr:hover td {
-            background-color: #EFEFEF;
+            background-color: #EFF6FF;
         }
 
+        /* Input Area - Floating and Central */
         .input-area-wrapper {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             width: 100%;
-            background: var(--bg-main);
-            padding: 20px 0;
-            z-index: 10;
+            background: linear-gradient(to top, var(--bg-main) 90%, rgba(249, 250, 251, 0.8) 100%);
+            padding: 15px 0 25px 0;
+            z-index: 100;
         }
 
         .feature-controls {
@@ -168,23 +166,21 @@
             margin: 0 auto;
             text-align: right;
             padding-bottom: 10px;
-            padding-left: 10px;
-            padding-right: 10px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
         #image-btn {
-            background-color: #333; /* Dark background */
-            color: var(--accent-color); /* Gold text */
+            background-color: #6B7280;
+            color: #FFFFFF;
             border: none;
-            padding: 10px 15px;
+            padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
             transition: background-color 0.2s, transform 0.1s;
         }
-        #image-btn:hover {
-            background-color: #555;
-        }
+        #image-btn:hover { background-color: #4B5563; }
 
         .input-area {
             display: flex;
@@ -192,10 +188,12 @@
             margin: 0 auto;
             padding: 10px;
             background-color: var(--bg-input);
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius-main);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
             align-items: flex-end; 
-            border: 1px solid #D1D1D1;
+            border: 1px solid #D1D5DB;
+            margin-left: 20px;
+            margin-right: 20px;
         }
 
         #user-input {
@@ -204,23 +202,26 @@
             border: none;
             color: var(--text-color);
             resize: none;
-            font-size: 1rem;
+            font-size: 1.1rem;
             padding: 5px 10px;
-            height: 30px; 
-            overflow: hidden;
+            min-height: 25px; 
+            max-height: 150px; 
+            overflow-y: auto;
             line-height: 1.5;
+            direction: rtl;
+            text-align: right;
         }
         #user-input:focus { outline: none; }
 
         #send-btn {
             background-color: var(--accent-color);
-            color: #333333;
+            color: #FFFFFF;
             border: none;
-            width: 35px;
-            height: 35px;
+            width: 38px;
+            height: 38px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -233,73 +234,86 @@
         .disclaimer {
             text-align: center;
             font-size: 0.75rem;
-            color: #64748b;
+            color: #9CA3AF;
             margin-top: 10px;
         }
 
+        /* Typing Indicator - Three Dots as requested */
+        .typing-indicator-wrapper {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E5E7EB;
+            min-height: 75px; /* ensure height matches standard message */
+        }
+        .typing-indicator-dots {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-right: 15px;
+        }
         .typing-indicator {
-            display: inline-block;
-            margin-right: 5px;
             width: 8px;
             height: 8px;
-            background-color: #ccc;
+            background-color: #6B7280;
             border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
+            animation: dot-bounce 1.4s infinite ease-in-out both;
         }
         .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
 
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
+        @keyframes dot-bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1.0); opacity: 1; }
         }
 
+        /* AI Features Button (TTS) */
         .ai-feature-buttons {
-            position: absolute;
-            bottom: 5px;
-            left: 10px;
+            margin-top: 15px;
             display: flex;
             gap: 5px;
         }
-
         .tts-button {
-            background-color: #333;
-            color: var(--accent-color);
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
+            background-color: #F3F4F6;
+            color: var(--text-color);
+            border: 1px solid #E5E7EB;
+            padding: 5px 10px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 0.8rem;
             transition: background-color 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
-        
-        .tts-button:hover {
-            background-color: #555;
-        }
+        .tts-button:hover { background-color: #E5E7EB; }
 
+        /* Image Generation Styles */
         .image-container {
             margin-top: 20px;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #D1D5DB;
         }
-
-        .image-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
+        .image-container img { width: 100%; height: auto; display: block; }
         .loading-image {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: #f0f0f0;
+            background-color: #FFFFFF;
             height: 300px;
             border-radius: 12px;
-            color: #333;
+            color: var(--accent-color);
             font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .input-area, .feature-controls { margin-left: 10px; margin-right: 10px; }
+            .message { padding-left: 10px; padding-right: 10px; }
+            .message-icon { margin-left: 10px; }
         }
     </style>
 </head>
@@ -311,13 +325,15 @@
             </div>
             
             <div class="messages-display" id="messages-display">
+                <!-- Initial Welcome Message - Updated -->
                 <div class="message ai-message">
                     <div class="message-icon"><i class="fas fa-hat-wizard"></i></div>
                     <div class="message-content">
-                        <p>أهلاً بك يا سيدي الكاتب. أنا الرانيك، هنا لأنسج لك قصصاً وروايات بتفاصيل لا تُمل. <br>أخبرني ببداية قصتك، الشخصيات الرئيسية، ونوع الرواية التي تريدها (خيال علمي، تاريخي، دراما...) وسأكمل السرد بأسلوب عبقري ومتفهم.</p>
+                        <p>أهلاً بك أيها الكاتب المبدع! أنا **الرانيك**، النموذج المتطور للرواية والتحليل التاريخي.</p>
+                        <p>أنا هنا لأجيب على أي استفسار أدبي أو تاريخي بتفاصيل دقيقة وواقعية. تفضل بما تجول به أفكارك وسأقوم بتفصيلها فوراً.</p>
                         <div class="ai-feature-buttons">
                             <button class="tts-button" onclick="textToSpeech(this)">
-                                <i class="fas fa-volume-up"></i>
+                                <i class="fas fa-volume-up"></i> قراءة
                             </button>
                         </div>
                     </div>
@@ -355,8 +371,7 @@
         let chatHistory = [];
 
         // ******** النظام الأساسي للرانيك - قواعد ثابتة لا تتغير ********
-        // هذا المتغير يحتوي على القواعد التي تجعل الرانيك دقيقاً وواقعياً في سرد القصص العسكرية والتاريخية.
-        const systemPrompt = "أنت الرانيك، روائي عبقري ومؤرخ دقيق. مهمتك هي كتابة روايات وسيناريوهات غاية في الواقعية والتفصيل، مع التركيز على الدقة التاريخية المطلقة. عندما يُطلب منك وصف حدث تاريخي، مثل حرب، يجب أن يكون سردك مطابقاً للحقيقة تماماً، بما في ذلك التفاصيل الدقيقة مثل المعدات العسكرية، الصفقات، أو حتى تحركات الجيوش. يجب أن تكون ذكياً جداً ومتفهماً لكل طلب، وأن تستطيع استنتاج التفاصيل الواقعية حتى لو لم يذكرها المستخدم صراحة. استخدم أسلوباً فخماً ومتقناً في كل كتاباتك. **الالتزام المطلق للجدول:** عندما يُطلب منك أي **مقارنة**، أو **تصنيف**، أو عرض **خسائر**، يجب عليك **فوراً** استخدام جدول Markdown. **أمر صارم حول محتوى الجدول:** يجب أن تكون كل خلية في الجدول تحتوي على القيمة الحقيقية والمحددة **فقط**، دون أي وصف أو إطالة. **يجب أن تكون البيانات واقعية جداً، وتفصيلية، ومطابقة مباشرة لاسم العمود/الصف (مثل: 75 كم/س، 120 مم، 8000 جندي). لا تترك خانة فارغة أبداً.** يجب استخدام معدات عسكرية حقيقية ومعاصرة (مثل F-35، T-90، إلخ) وتفاصيل واقعية ومحددة (مثل مدى، سرعة، حمولة). **افصل كل نقطة مقارنة في سطر منفصل وواضح**، مثل: 'القوة البشرية', 'القوات العاملة', 'القوات الاحتياطية', 'الميزانية الدفاعية', 'القوات البرية', 'القوات الجوية', 'القوات البحرية', و'القدرات التكنولوجية'. هذا يضمن أعلى مستوى من الدقة والذكاء في العرض. ردودك يجب أن تكون سريعة جداً، منظمة في فقرات واضحة ومرتبة تحت بعضها. لا تبدأ بالكتابة قبل أن تتأكد من فهمك التام لطلب المستخدم.";
+        const systemPrompt = "أنت الرانيك، روائي عبقري ومؤرخ دقيق. مهمتك هي كتابة روايات وسيناريوهات غاية في الواقعية والتفصيل، مع التركيز على الدقة التاريخية المطلقة. **اللغة الأساسية والوحيدة للردود هي العربية الفصحى، التزم بها التزاماً مطلقاً ولا تستخدم أي لغة أخرى بما في ذلك الإنجليزية، حتى عند التعامل مع مصطلحات أجنبية. ردودك يجب أن تكون فورية وسريعة جداً. لا تتأخر في الرد أبداً.** عندما يُطلب منك وصف حدث تاريخي، مثل حرب، أن يكون سردك مطابقاً للحقيقة تماماً، بما في ذلك التفاصيل الدقيقة مثل المعدات العسكرية، الصفقات، أو حتى تحركات الجيوش. يجب أن تكون ذكياً جداً ومتفهماً لكل طلب، وأن تستطيع استنتاج التفاصيل الواقعية حتى لو لم يذكرها المستخدم صراحة. استخدم أسلوباً فخماً ومتقناً في كل كتاباتك. **الالتزام المطلق للجدول:** عندما يُطلب منك أي **مقارنة**، أو **تصنيف**، أو عرض **خسائر**، يجب عليك **فوراً** استخدام جدول Markdown. **أمر صارم حول محتوى الجدول:** يجب أن تكون كل خلية في الجدول تحتوي على القيمة الحقيقية والمحددة **فقط**، دون أي وصف أو إطالة. **يجب أن تكون البيانات واقعية جداً، وتفصيلية، ومطابقة مباشرة لاسم العمود/الصف (مثل: 75 كم/س، 120 مم، 8000 جندي). لا تترك خانة فارغة أبداً.** يجب استخدام معدات عسكرية حقيقية ومعاصرة (مثل F-35، T-90، إلخ) وتفاصيل واقعية ومحددة (مثل مدى، سرعة، حمولة). **افصل كل نقطة مقارنة في سطر منفصل وواضح**، مثل: 'القوة البشرية', 'القوات العاملة', 'القوات الاحتياطية', 'الميزانية الدفاعية', 'القوات البرية', 'القوات الجوية', 'القوات البحرية', و'القدرات التكنولوجية'. هذا يضمن أعلى مستوى من الدقة والذكاء في العرض.";
         // *************************************************************
 
         async function sendMessage() {
@@ -369,11 +384,11 @@
             // Display user message
             addMessage(userPrompt, false);
             inputField.value = '';
-            inputField.style.height = '30px';
+            inputField.style.height = '25px';
 
-            // Show typing indicator and disable input
+            // Show typing indicator (three dots)
             const typingIndicatorMessage = addMessage(
-                '<div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div>', 
+                '<div class="typing-indicator-dots"><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div></div>', 
                 true,
                 true // Skip features (TTS) for loading message
             );
@@ -398,17 +413,16 @@
                 });
                 const result = await response.json();
                 
-                // Robust check to prevent errors if the API response is not as expected
                 if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                     const aiResponse = result.candidates[0].content.parts[0].text;
                     
                     // Remove the typing indicator and add the AI's response
                     typingIndicatorMessage.remove();
-                    addMessage(md.render(aiResponse), true);
+                    addMessage(aiResponse, true); // Pass raw response to be handled by addMessage
                     chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
                 } else {
                     typingIndicatorMessage.remove();
-                    addMessage("عذراً، لم يتمكن الرانيك من إرسال رد. قد تكون هناك مشكلة في البيانات التي أرسلتها أو في الاتصال. يرجى المحاولة مرة أخرى.", true);
+                    addMessage("عذراً، لم يتمكن الرانيك من إرسال رد. يرجى المحاولة مرة أخرى.", true);
                 }
 
             } catch (error) {
@@ -425,16 +439,12 @@
 
         /**
          * Converts base64 encoded PCM audio data to a WAV Blob.
-         * @param {string} base64Data The base64 encoded audio data.
-         * @param {number} sampleRate The sample rate of the audio.
-         * @returns {Blob} A Blob containing the WAV audio data.
          */
         function pcmToWav(base64Data, sampleRate) {
             const audioData = atob(base64Data);
             const pcmData = new Int16Array(audioData.length / 2);
 
             for (let i = 0; i < audioData.length / 2; i++) {
-                // The API returns little-endian 16-bit PCM
                 const byte1 = audioData.charCodeAt(2 * i);
                 const byte2 = audioData.charCodeAt(2 * i + 1);
                 pcmData[i] = (byte2 << 8) | byte1;
@@ -456,27 +466,27 @@
                 offset += str.length;
             };
 
-            writeString('RIFF'); // ChunkID
-            view.setUint32(offset, 36 + dataSize, true); // ChunkSize
+            writeString('RIFF'); 
+            view.setUint32(offset, 36 + dataSize, true); 
             offset += 4;
-            writeString('WAVE'); // Format
-            writeString('fmt '); // Subchunk1ID
-            view.setUint32(offset, 16, true); // Subchunk1Size
+            writeString('WAVE'); 
+            writeString('fmt '); 
+            view.setUint32(offset, 16, true); 
             offset += 4;
-            view.setUint16(offset, 1, true); // AudioFormat (1=PCM)
+            view.setUint16(offset, 1, true); 
             offset += 2;
-            view.setUint16(offset, numChannels, true); // NumChannels
+            view.setUint16(offset, numChannels, true); 
             offset += 2;
-            view.setUint32(offset, sampleRate, true); // SampleRate
+            view.setUint32(offset, sampleRate, true); 
             offset += 4;
-            view.setUint32(offset, byteRate, true); // ByteRate
+            view.setUint32(offset, byteRate, true); 
             offset += 4;
-            view.setUint16(offset, blockAlign, true); // BlockAlign
+            view.setUint16(offset, blockAlign, true); 
             offset += 2;
-            view.setUint16(offset, bitsPerSample, true); // BitsPerSample
+            view.setUint16(offset, bitsPerSample, true); 
             offset += 2;
-            writeString('data'); // Subchunk2ID
-            view.setUint32(offset, dataSize, true); // Subchunk2Size
+            writeString('data'); 
+            view.setUint32(offset, dataSize, true); 
             offset += 4;
 
             // Write PCM data
@@ -489,14 +499,11 @@
         }
 
         async function textToSpeech(button) {
-            // Get the text content from the message, excluding the feature buttons
             const messageContentElement = button.closest('.message-content');
             let messageContent = messageContentElement.textContent.trim();
             
-            // If the element has a features container, remove its text content from the TTS prompt
             const featureButtons = messageContentElement.querySelector('.ai-feature-buttons');
             if (featureButtons) {
-                // Clone the content element to remove feature buttons before TTS
                 const tempClone = messageContentElement.cloneNode(true);
                 tempClone.querySelector('.ai-feature-buttons')?.remove();
                 messageContent = tempClone.textContent.trim();
@@ -554,7 +561,6 @@
         }
 
         async function generateImage(userPrompt) {
-            // Enhancing prompt to ensure high-quality, cinematic, and detailed output
             const enhancedPrompt = userPrompt + ", cinematic, highly detailed, fantasy digital painting, 4k";
 
             const payload = { 
@@ -605,12 +611,11 @@
             addMessage(`طلب صورة: ${prompt}`, false);
 
             const loadingMessage = addMessage(
-                '<div class="loading-image"><i class="fas fa-palette fa-spin fa-2x"></i><p style="margin-right: 15px; margin-top: 15px;"> الرانيك يرسم المشهد... قد يستغرق الأمر بعض الوقت. </p></div>',
+                '<div class="typing-indicator-dots"><i class="fas fa-palette fa-spin" style="margin-left: 10px; color: var(--accent-color);"></i></div>',
                 true,
-                true // isSpecialMessage flag for the loading state
+                true
             );
             
-            // Disable input while generating image
             const sendBtn = document.getElementById('send-btn');
             const inputField = document.getElementById('user-input');
             const imageBtn = document.getElementById('image-btn');
@@ -621,7 +626,6 @@
             try {
                 const imageUrl = await generateImage(prompt);
                 
-                // Remove loading message
                 loadingMessage.remove();
 
                 if (imageUrl) {
@@ -635,7 +639,6 @@
                 loadingMessage.remove();
                 addMessage("حدث خطأ أثناء توليد الصورة. يرجى المحاولة مرة أخرى.", true);
             } finally {
-                // Re-enable controls
                 sendBtn.disabled = false;
                 inputField.disabled = false;
                 imageBtn.disabled = false;
@@ -646,39 +649,58 @@
         function addMessage(content, isAI, skipFeatures = false) {
             const display = document.getElementById('messages-display');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
-
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'message-icon';
-            iconDiv.innerHTML = isAI ? '<i class="fas fa-hat-wizard"></i>' : '<i class="fas fa-user-circle"></i>';
-
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
             
-            // Add TTS button to AI messages, unless skipped (like for loading indicator)
-            if (isAI && !skipFeatures) { 
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'ai-feature-buttons';
-                const ttsButton = document.createElement('button');
-                ttsButton.className = 'tts-button';
-                ttsButton.innerHTML = '✨ <i class="fas fa-volume-up"></i>';
-                ttsButton.onclick = () => textToSpeech(ttsButton);
-                buttonContainer.appendChild(ttsButton);
-                contentDiv.appendChild(buttonContainer);
+            if (isAI && content.includes('typing-indicator-dots')) {
+                // Special handling for the typing indicator
+                messageDiv.className = `message ai-message typing-indicator-wrapper`;
+                
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'message-icon';
+                iconDiv.innerHTML = '<i class="fas fa-hat-wizard"></i>';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.innerHTML = content;
+                
+                messageDiv.appendChild(iconDiv);
+                messageDiv.appendChild(contentDiv);
+            } else {
+                // Standard message bubble
+                messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'message-icon';
+                iconDiv.innerHTML = isAI ? '<i class="fas fa-hat-wizard"></i>' : '<i class="fas fa-user-circle"></i>';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                // 1. Process Content (Markdown rendering)
+                const processedContent = isAI && !skipFeatures ? md.render(content) : content;
+                contentDiv.innerHTML = processedContent; // <-- تم التغيير: نضع المحتوى النظيف مباشرة
+
+                // 2. Add TTS button to AI messages, unless skipped (appended after content)
+                if (isAI && !skipFeatures) { 
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.className = 'ai-feature-buttons';
+                    const ttsButton = document.createElement('button');
+                    ttsButton.className = 'tts-button';
+                    ttsButton.innerHTML = '<i class="fas fa-volume-up"></i> قراءة';
+                    ttsButton.onclick = () => textToSpeech(ttsButton);
+                    buttonContainer.appendChild(ttsButton);
+                    
+                    // Append the buttons after the content has been set
+                    contentDiv.appendChild(buttonContainer);
+                }
+                
+                messageDiv.appendChild(iconDiv);
+                messageDiv.appendChild(contentDiv);
             }
 
-            contentDiv.innerHTML = contentDiv.innerHTML + content; // Append content after buttons if any
-            
-            messageDiv.appendChild(iconDiv);
-            messageDiv.appendChild(contentDiv);
             display.appendChild(messageDiv);
-            
-            // Scroll to the bottom of the chat
             display.scrollTop = display.scrollHeight;
             return messageDiv;
         }
 
-        // Event listener for sending a message on 'Enter' key press
         document.getElementById('user-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault(); 
@@ -686,11 +708,15 @@
             }
         });
 
-        // Auto-resize the input textarea based on content
         document.getElementById('user-input').addEventListener('input', function() {
             this.style.height = 'auto'; 
             this.style.height = (this.scrollHeight) + 'px'; 
         });
+        
+        window.onload = function() {
+            const inputField = document.getElementById('user-input');
+            inputField.style.height = '25px';
+        };
     </script>
 </body>
 </html>

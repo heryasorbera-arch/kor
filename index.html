@@ -132,8 +132,12 @@
         .tts-button i {
             margin-left: 5px;
         }
-        .tts-button:hover {
+        .tts-button:hover:not(:disabled) {
             background-color: #D1D5DB;
+        }
+        .tts-button:disabled {
+             opacity: 0.5;
+             cursor: not-allowed;
         }
 
         /* --- Custom Markdown Table Styling (Protected Logic) --- */
@@ -244,7 +248,12 @@
             justify-content: center;
             transition: background-color 0.2s, transform 0.1s;
         }
-        #send-btn:hover { background-color: var(--accent-hover); }
+        #send-btn:hover:not(:disabled) { background-color: var(--accent-hover); }
+        #send-btn:disabled {
+             opacity: 0.5;
+             cursor: not-allowed;
+        }
+
 
         /* Floating Image Generation Button (Sphere Button) */
         #image-generator-btn {
@@ -265,7 +274,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s, background-color 0.2s;
         }
-        #image-generator-btn:hover {
+        #image-generator-btn:hover:not(:disabled) {
             background-color: #4B5563;
             transform: scale(1.1);
         }
@@ -321,7 +330,7 @@
 
     </style>
 </head>
-<body>
+<body onload="initializeApp()">
     <!-- نظام الإشعارات المتطور -->
     <div id="notification" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md bg-emerald-500 text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 space-x-reverse" role="alert">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
@@ -377,7 +386,7 @@
         </div>
     </div>
 
-    <!-- مودال تخصيص الأوامر المطوَّر -->
+    <!-- مودال تخصيص الأوامر المطوَّر -->
     <div id="customizationModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl transform transition-all duration-300 scale-100 opacity-100">
 
@@ -403,7 +412,7 @@
             </div>
 
             <div class="mt-8 flex justify-end gap-4">
-                <!-- زر الإغلاق المطوَّر -->
+                <!-- زر الإغلاق المطوَّر -->
                 <button id="closeModalBtn" onclick="closeModal()"
                     class="close-btn-modern px-6 py-3 bg-red-500 text-white font-semibold rounded-xl shadow-lg hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75">
                     إلغاء/إغلاق
@@ -461,7 +470,7 @@
     <script>
         // --- NOTE: ALL FIREBASE CODE HAS BEEN REMOVED. SAVING NOW USES localStorage. ---
 
-        // Global environment variables (API Key is kept)
+        // Global environment variables (API Key is set to empty string for runtime injection)
         const apiKey = "AIzaSyCz5vW1NQUnJd4iqLRoRLLzhXy-aM5YklQ"; 
         const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
@@ -478,8 +487,8 @@
         let chatHistory = [];
         
         // --- Default System Prompt ---
-        // ملاحظة: تم تحديث الرسالة الترحيبية وتعليمات الحفظ لتتناسب مع التخزين المحلي
-        let systemPrompt = "أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. \n\n**التوجيه الأساسي للبرمجة الداخلية - الجداول:** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. يجب أن يتضمن الجدول أعمدة واضحة وعناوين جذابة.\n\n**القاعدة العامة:** ممنوع منعاً باتاً إخراج أي وسوم HTML صريحة مثل <p> أو <strong> أو أي علامات غير مارك داون. يجب أن يكون الناتج نصاً نقياً ومنسقاً فقط بالمارك داون.";
+        // ملاحظة: تم تعزيز الأوامر هنا لضمان بدء الرد بالجدول مباشرة عند طلب مقارنة أو تصنيف.
+        let systemPrompt = "أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. \n\n**التوجيه الأساسي للبرمجة الداخلية - الجداول:** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. **يجب أن يكون الجدول هو الجزء الأهم والأول من الرد، و لا يجوز فصله بأي نص إضافي قبل بدايته.** يجب أن يتضمن الجدول أعمدة واضحة وعناوين جذابة. **إذا لم يطلب المستخدم جدولاً، يمكنك إضافة أي نص مارك داون مناسب.**\n\n**القاعدة العامة:** ممنوع منعاً باتاً إخراج أي وسوم HTML صريحة مثل <p> أو <strong> أو أي علامات غير مارك داون. يجب أن يكون الناتج نصاً نقياً ومنسقاً فقط بالمارك داون.";
 
         // جلب عناصر الواجهة
         const modal = document.getElementById('customizationModal');
@@ -507,21 +516,31 @@
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, options);
+                    const responseText = await response.text();
                     
                     if (response.status === 429) {
                         throw new Error("Rate limit exceeded (429)");
                     }
                     
-                    const responseText = await response.text();
-                    
                     if (!response.ok) {
                         let errorMessage = `HTTP error! status: ${response.status}`;
+                        let errorDetails = response.statusText;
+                        
                         try {
                             const errorBody = JSON.parse(responseText);
-                            errorMessage += ` - ${errorBody.error?.message || response.statusText}`;
+                            errorDetails = errorBody.error?.message || response.statusText;
+
+                            // **تحسين معالجة أخطاء المفتاح (400/403)**
+                            if (response.status === 400 || response.status === 403) {
+                                errorDetails = `تحقق من مفتاح API (Key) الخاص بك، فقد يكون غير صالح أو انتهت صلاحيته. (Details: ${errorDetails})`;
+                            }
+
                         } catch (e) {
-                            errorMessage += ` - ${response.statusText} (Raw body: ${responseText.substring(0, 100)})`;
+                            errorDetails = `${response.statusText} (Raw body: ${responseText.substring(0, 100)})`;
                         }
+                        
+                        errorMessage += ` - ${errorDetails}`;
+                        console.error("API Call Failed Details:", errorMessage);
                         throw new Error(errorMessage);
                     }
 
@@ -530,6 +549,11 @@
                         return {};
                     }
 
+                    // For image generation API, the payload is sometimes nested differently
+                    if (url.includes(IMAGE_MODEL)) {
+                         return JSON.parse(responseText);
+                    }
+                    
                     return JSON.parse(responseText);
 
                 } catch (error) {
@@ -547,7 +571,7 @@
         function showNotification(message, type = 'success') {
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
             const iconHtml = type === 'success' 
-                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>'
+                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucude-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>'
                 : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-octagon"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/></svg>';
 
             notificationElement.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 space-x-reverse ${bgColor}`;
@@ -619,18 +643,33 @@
             sendBtn.disabled = !isChatActive;
             document.getElementById('image-generator-btn').disabled = !isChatActive;
             
+            // Auto-adjust textarea height on input
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // Handle Enter key for sending messages
+            userInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    if (!this.disabled) sendMessage();
+                }
+            });
+
             const welcomeMessageEl = messagesDisplay.querySelector('.message.ai-message .message-content p');
             if(welcomeMessageEl && welcomeMessageEl.textContent.includes('جاري تهيئة')) {
                 const firebaseStatusNote = 'لقد تم تحميل أوامرك المخصصة **محلياً** في متصفحك. يمكنك الآن حفظ وتعديل إعدادات الرانيك الخاصة بك.';
 
-                 const contentDiv = welcomeMessageEl.parentElement;
-                 
-                 const welcomeText = `
-                    <p>أهلاً بك! أنا **الرانيك**، محاور رفيع المستوى وأديب حصيف. أسلوبي متطور جداً ولن أخرج عن مساري مطلقاً. يمكنك التحدث معي حول أي موضوع. لقد تم الآن **برمجتي داخلياً** لإنشاء **جداول متطورة ومنظمة** تلقائيًا عند طلب مقارنة أو تصنيف أو تقرير مالي.</p>
+                const contentDiv = welcomeMessageEl.parentElement;
+                
+                // تم تحديث هذه الرسالة لتعكس التعديل على الجداول
+                const welcomeText = `
+                    <p>أهلاً بك! أنا **الرانيك**، محاور رفيع المستوى وأديب حصيف. أسلوبي متطور جداً ولن أخرج عن مساري مطلقاً. يمكنك التحدث معي حول أي موضوع. لقد تم الآن **برمجتي داخلياً** لإنشاء **جداول متطورة ومنظمة تبدأ مباشرة بالجدول** تلقائيًا عند طلب مقارنة أو تصنيف أو تقرير مالي.</p>
                     <p><strong>${firebaseStatusNote}</strong></p>
-                 `;
+                `;
 
-                 renderStandardContent(contentDiv, welcomeText);
+                renderStandardContent(contentDiv, welcomeText);
             }
         }
 
@@ -702,8 +741,11 @@
          */
         function sanitizeOutput(rawText) {
             let cleanText = rawText.trim();
+            // Attempt to remove common initial and final wrapper tags generated by LLMs
             cleanText = cleanText.replace(/^(<p>|<\/p>|<p><strong>|<strong>)/i, '').replace(/(<\/p>|<strong><\/p>|<strong>|<\/strong>)$/i, '');
+            // Convert any remaining <strong>/</strong> to Markdown **
             cleanText = cleanText.replace(/<strong>/gi, '**').replace(/<\/strong>/gi, '**');
+            // Remove surrounding quotes if present
             cleanText = cleanText.replace(/^"|"$/g, '').trim();
 
             return cleanText;
@@ -724,13 +766,67 @@
             const ttsButton = document.createElement('button');
             ttsButton.className = 'tts-button';
             ttsButton.innerHTML = '<i class="fas fa-volume-up"></i> قراءة';
-            ttsButton.onclick = () => textToSpeech(ttsButton);
+            ttsButton.onclick = () => textToSpeech(ttsButton, sanitizedText); // Pass the text to be spoken
             buttonContainer.appendChild(ttsButton);
             
             contentDiv.appendChild(buttonContainer);
         }
 
-        // --- Chat Functions (CLEANED) ---
+        // --- TTS Helper Functions (Required for PCM to WAV conversion) ---
+
+        /**
+         * Convert a base64 string to an ArrayBuffer.
+         */
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /**
+         * Convert 16-bit PCM audio data to a WAV Blob.
+         */
+        function pcmToWav(pcm16, sampleRate) {
+            const dataLength = pcm16.length * 2; // 16-bit PCM (2 bytes per sample)
+            const buffer = new ArrayBuffer(44 + dataLength); // 44 bytes for WAV header
+
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            // RIFF chunk descriptor
+            view.setUint32(offset, 0x52494646, false); offset += 4; // "RIFF"
+            view.setUint32(offset, 36 + dataLength, true); offset += 4; // ChunkSize
+            view.setUint32(offset, 0x57415645, false); offset += 4; // "WAVE"
+
+            // fmt sub-chunk
+            view.setUint32(offset, 0x666d7420, false); offset += 4; // "fmt "
+            view.setUint32(offset, 16, true); offset += 4; // Subchunk1Size (16 for PCM)
+            view.setUint16(offset, 1, true); offset += 2; // AudioFormat (1 for PCM)
+            view.setUint16(offset, 1, true); offset += 2; // NumChannels (1 for mono)
+            view.setUint32(offset, sampleRate, true); offset += 4; // SampleRate
+            view.setUint32(offset, sampleRate * 2, true); offset += 4; // ByteRate (SampleRate * NumChannels * BitsPerSample/8)
+            view.setUint16(offset, 2, true); offset += 2; // BlockAlign (NumChannels * BitsPerSample/8)
+            view.setUint16(offset, 16, true); offset += 2; // BitsPerSample (16)
+
+            // data sub-chunk
+            view.setUint32(offset, 0x64617461, false); offset += 4; // "data"
+            view.setUint32(offset, dataLength, true); offset += 4; // Subchunk2Size
+
+            // Write PCM data
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(offset, pcm16[i], true);
+                offset += 2;
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+
+        // --- Core Chat Functions ---
 
         async function sendMessage() {
             const userPrompt = userInput.value.trim();
@@ -742,155 +838,93 @@
             userInput.value = '';
             userInput.style.height = '25px';
 
-            // 2. Show typing indicator 
+            // 2. Show typing indicator and disable input
             const { contentDiv } = addMessage(
                 '<div class="typing-indicator-dots"><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div></div>',
                 true,
-                true 
+                true
             );
-            sendBtn.disabled = true;
-            userInput.disabled = true;
-            document.getElementById('image-generator-btn').disabled = true;
-
-            // 3. Prepare Payload 
-            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
             
+            enableChatUI(false);
+            
+            // 3. Prepare chat history (including the new user prompt)
+            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+
             const payload = {
                 contents: chatHistory,
-                systemInstruction: { parts: [{ text: systemPrompt }] },
+                // Add system instruction for persona and formatting rules
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                // Enable Google Search grounding for up-to-date info
                 tools: [{ "google_search": {} }],
             };
-            
+
             try {
-                const response = await fetchWithBackoff(textApiUrl, {
+                // 4. Call the Gemini Text API
+                const result = await fetchWithBackoff(textApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                const result = response;
-
-                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-                    const rawResponse = result.candidates[0].content.parts[0].text;
-                    
-                    // 4. Render Standard Content 
-                    contentDiv.innerHTML = ''; // Clear loading dots
-                    renderStandardContent(contentDiv, rawResponse); 
-                    chatHistory.push({ role: "model", parts: [{ text: rawResponse }] });
-                    
-                } else {
-                    contentDiv.innerHTML = "عذراً، لم يتمكن الرانيك من إرسال رد. يرجى المحاولة مرة أخرى.";
+                
+                // 5. Check for explicit API error
+                if (result.error) {
+                    throw new Error(result.error.message || "خطأ API غير محدد.");
                 }
 
-            } catch (error) {
-                 console.error('Error fetching AI response:', error);
-                 contentDiv.innerHTML = "حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى.";
-                 chatHistory.push({ role: "model", parts: [{ text: "حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى." }] });
+                const candidate = result.candidates?.[0];
+                let aiText = "";
 
+                if (candidate?.content?.parts?.[0]?.text) {
+                    aiText = candidate.content.parts[0].text;
+                } else if (candidate?.safetyRatings) {
+                    // **الرد المحظور أمنياً**
+                    aiText = "عذراً، تم حظر هذا الرد بواسطة فلاتر الأمان. يرجى تعديل استفسارك ليكون أكثر ملائمة.";
+                } else {
+                    // **الرد الفارغ أو غير المتوقع**
+                    aiText = "عذراً، حدث خطأ غير متوقع أثناء المعالجة أو لم يتم العثور على محتوى مناسب. (الرد فارغ)";
+                }
+
+                // 6. Update chat history and display result
+                chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+                renderStandardContent(contentDiv, aiText);
+
+            } catch (error) {
+                // عرض رسالة الخطأ التفصيلية للمستخدم
+                const errorMessage = `خطأ في الاتصال بالنموذج: ${error.message}`;
+                contentDiv.innerHTML = `<p class="text-red-600 font-bold">${errorMessage}</p>`;
+                console.error("Chat API Error:", error);
             } finally {
-                sendBtn.disabled = false;
-                userInput.disabled = false;
-                document.getElementById('image-generator-btn').disabled = false;
+                // 7. Re-enable input and scroll
+                enableChatUI(true);
                 messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
             }
         }
 
-        // --- TTS Functions (Unchanged) ---
-
-        function pcmToWav(base64Data, sampleRate) {
-            const audioString = atob(base64Data);
-            const pcmDataLength = audioString.length / 2;
-            const pcmData = new Int16Array(pcmDataLength);
-            for (let i = 0; i < pcmDataLength; i++) {
-                const byte1 = audioString.charCodeAt(2 * i);
-                const byte2 = audioString.charCodeAt(2 * i + 1);
-                pcmData[i] = (byte2 << 8) | byte1; 
-            }
-            
-            const numChannels = 1;
-            const bitsPerSample = 16;
-            const blockAlign = numChannels * (bitsPerSample / 8);
-            const byteRate = sampleRate * blockAlign;
-            const dataSize = pcmData.length * (bitsPerSample / 8);
-
-            const buffer = new ArrayBuffer(44 + dataSize);
-            const view = new DataView(buffer);
-
-            let offset = 0;
-            const writeString = (str) => {
-                for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-                offset += str.length;
-            };
-
-            // RIFF header
-            writeString('RIFF'); 
-            view.setUint32(offset, 36 + dataSize, true); 
-            offset += 4;
-            writeString('WAVE'); 
-            
-            // FMT chunk
-            writeString('fmt '); 
-            view.setUint32(offset, 16, true); 
-            offset += 4;
-            view.setUint16(offset, 1, true); // Audio format 1 (PCM)
-            offset += 2;
-            view.setUint16(offset, numChannels, true); 
-            offset += 2;
-            view.setUint32(offset, sampleRate, true); 
-            offset += 4;
-            view.setUint32(offset, byteRate, true); 
-            offset += 4;
-            view.setUint16(offset, blockAlign, true); 
-            offset += 2;
-            view.setUint16(offset, bitsPerSample, true); 
-            offset += 2;
-            
-            // DATA chunk
-            writeString('data'); 
-            view.setUint32(offset, dataSize, true); 
-            offset += 4;
-
-            // Write PCM data
-            for (let i = 0; i < pcmData.length; i++) {
-                view.setInt16(offset, pcmData[i], true); 
-                offset += 2;
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        }
-
-
-        async function textToSpeech(button) {
-            const messageContentElement = button.closest('.message-content');
-            
-            const tempClone = messageContentElement.cloneNode(true);
-            tempClone.querySelector('.ai-feature-buttons')?.remove();
-
-            let messageContent = tempClone.textContent.trim();
-            
-            messageContent = messageContent.replace(/\*\*|__|#|`/g, '');
-            messageContent = messageContent.substring(0, 1000); 
-
-            if (!messageContent) return;
-
+        /**
+         * TTS Implementation
+         * @param {HTMLButtonElement} button - The button element to disable/enable.
+         * @param {string} textToSpeak - The text content to convert to speech.
+         */
+        async function textToSpeech(button, textToSpeak) {
             button.disabled = true;
-            const icon = button.querySelector('i');
-            icon.classList.remove('fa-volume-up');
-            icon.classList.add('fa-spinner', 'fa-spin');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري القراءة...';
+            
+            const cleanText = textToSpeak.replace(/(\*\*|`)/g, '').trim(); // Remove Markdown for clean TTS
 
             const payload = {
-                contents: [{
-                    parts: [{ text: messageContent }]
-                }],
+                contents: [{ parts: [{ text: `Say in a formal, informative Arabic voice: ${cleanText}` }] }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
                     speechConfig: {
+                        // Using a formal Arabic-sounding voice (Kore is a firm voice)
                         voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: "Kore" }
+                             prebuiltVoiceConfig: { voiceName: "Kore" }
                         }
                     }
-                },
-                model: TTS_MODEL
+                }
             };
 
             try {
@@ -902,166 +936,136 @@
                 
                 const part = result?.candidates?.[0]?.content?.parts?.[0];
                 const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
+                const mimeType = part?.inlineData?.mimeType; // Should be audio/L16;rate=...
 
-                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
                     const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
-                    const wavBlob = pcmToWav(audioData, sampleRate);
+                    if (!sampleRateMatch) throw new Error("Could not determine sample rate from TTS response.");
+                    
+                    const sampleRate = parseInt(sampleRateMatch[1], 10);
+                    
+                    // 1. Convert Base64 (Signed PCM16) to ArrayBuffer
+                    const pcmDataBuffer = base64ToArrayBuffer(audioData);
+                    
+                    // 2. Interpret as Int16Array
+                    const pcm16 = new Int16Array(pcmDataBuffer);
+                    
+                    // 3. Convert PCM data to WAV Blob
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    
+                    // 4. Create and play Audio
                     const audioUrl = URL.createObjectURL(wavBlob);
                     const audio = new Audio(audioUrl);
                     
+                    button.innerHTML = '<i class="fas fa-volume-up"></i> جاري التشغيل...';
+                    
                     audio.onended = () => {
-                        icon.classList.remove('fa-spinner', 'fa-spin');
-                        icon.classList.add('fa-volume-up');
+                        button.innerHTML = originalText;
                         button.disabled = false;
+                        URL.revokeObjectURL(audioUrl); // Clean up the URL
                     };
-                    audio.play();
+                    audio.play().catch(e => {
+                        console.error("Audio playback error:", e);
+                        showNotification("فشل تشغيل الصوت.", 'error');
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    });
+
                 } else {
-                    console.error("Invalid audio data received.");
-                    showNotification('فشل توليد الصوت. قد تكون المشكلة في النص.', 'error');
+                    throw new Error("Invalid audio data received from API.");
                 }
+
             } catch (error) {
-                console.error('Error with TTS:', error);
-                showNotification('حدث خطأ أثناء محاولة القراءة الصوتية.', 'error');
+                console.error("TTS API Error:", error);
+                showNotification(`خطأ في توليد الصوت: ${error.message.substring(0, 80)}`, 'error');
+                button.innerHTML = originalText;
             } finally {
-                icon.classList.remove('fa-spinner', 'fa-spin');
-                icon.classList.add('fa-volume-up');
-                button.disabled = false;
+                if (!button.disabled || button.innerHTML.includes('جاري التشغيل')) {
+                   // Only re-enable if it's not currently playing
+                   button.disabled = false;
+                   button.innerHTML = originalText;
+                }
             }
         }
 
-        // --- Image Generation Functions (Unchanged) ---
-        
-        function hideImageModal() {
-            imageModalEl.classList.add('hidden');
-            imageModalEl.classList.remove('flex');
-        }
-        
-        function promptForImage() {
-            const lastUserPrompt = chatHistory.slice().reverse().find(msg => msg.role === 'user')?.parts[0]?.text || '';
-            imagePromptInputEl.value = lastUserPrompt;
 
+        // --- Image Generation Functions ---
+
+        function promptForImage() {
+            imagePromptInputEl.value = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1].parts[0].text : '';
             imageErrorMessageEl.classList.add('hidden');
             imageModalEl.classList.remove('hidden');
-            imageModalEl.classList.add('flex');
-            imagePromptInputEl.focus();
+        }
+
+        function hideImageModal() {
+            imageModalEl.classList.add('hidden');
         }
 
         async function handleImageGeneration() {
-            const prompt = imagePromptInputEl.value.trim();
-            if (!prompt) {
-                imageErrorMessageEl.textContent = 'يرجى إدخال وصف تفصيلي للصورة.';
+            const imagePrompt = imagePromptInputEl.value.trim();
+            if (imagePrompt.length < 10) {
+                imageErrorMessageEl.textContent = "يجب أن يكون الوصف أطول وأكثر تفصيلاً (على الأقل 10 أحرف).";
                 imageErrorMessageEl.classList.remove('hidden');
                 return;
             }
-
+            
+            // Hide Modal, show Loading, Disable UI
             hideImageModal();
+            showLoading('جاري توليد الصورة الفنية...');
+            enableChatUI(false);
+            
+            // 1. Display user image prompt in chat
+            const userImagePrompt = `**[طلب توليد صورة]:** ${imagePrompt}`;
+            addMessage(userImagePrompt, false);
 
-            addMessage(`**طلب توليد صورة:** ${prompt}`, false);
-
-            showLoading("جاري توليد صورتك الإبداعية، قد يستغرق هذا بضع ثوانٍ...");
-
-            sendBtn.disabled = true;
-            userInput.disabled = true;
-            document.getElementById('image-generator-btn').disabled = true;
-
-            try {
-                const imageUrl = await generateImage(prompt);
-                
-                if (imageUrl) {
-                    const imageHtml = `
-                        <p>رسم **مساعد هرياسور** هذا المشهد بناءً على طلبك:</p>
-                        <div class="ai-image-container">
-                            <img src="${imageUrl}" alt="${prompt}">
-                        </div>`;
-                    const { contentDiv } = addMessage('', true);
-                    contentDiv.innerHTML = imageHtml;
-                } else {
-                    addMessage("عذراً، لم يتمكن مساعد هرياسور من توليد الصورة المطلوبة. يرجى محاولة وصف آخر.", true);
+            // 2. Prepare the payload for Imagen 3.0
+            const payload = {
+                instances: [{
+                    prompt: imagePrompt
+                }],
+                parameters: {
+                    "sampleCount": 1 // Request only one image
                 }
-            } catch (error) {
-                console.error("Error generating image:", error);
-                addMessage("حدث خطأ أثناء توليد الصورة. يرجى المحاولة مرة أخرى.", true);
-            } finally {
-                hideLoading();
-                sendBtn.disabled = false;
-                userInput.disabled = false;
-                document.getElementById('image-generator-btn').disabled = false;
-            }
-        }
-
-        async function generateImage(userPrompt) {
-            const enhancedPrompt = `High-quality, cinematic digital art, hyper-detailed, dramatic lighting. Depicts: ${userPrompt}`;
-
-            const payload = { 
-                instances: { prompt: enhancedPrompt },
-                parameters: { "sampleCount": 1 } 
             };
             
-            const result = await fetchWithBackoff(imageApiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            try {
+                // 3. Call the Image API (using :predict endpoint)
+                const result = await fetchWithBackoff(imageApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-            if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+
+                if (!base64Data) {
+                    throw new Error("فشل في الحصول على بيانات الصورة المشفرة.");
+                }
+
+                const imageUrl = `data:image/png;base64,${base64Data}`;
+
+                // 4. Display the generated image in the chat
+                const imageHtml = `
+                    <p>إليك النتيجة الفنية لطلبك:</p>
+                    <div class="ai-image-container">
+                        <img src="${imageUrl}" alt="${imagePrompt}">
+                    </div>
+                `;
+                addMessage(imageHtml, true);
+
+
+            } catch (error) {
+                const errorMessage = `خطأ في توليد الصورة: ${error.message}.`;
+                addMessage(`<p class="text-red-600 font-bold">${errorMessage}</p>`, true);
+                console.error("Image API Error:", error);
+            } finally {
+                // 5. Re-enable input and hide loading
+                hideLoading();
+                enableChatUI(true);
+                messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
             }
-            return null;
         }
 
-
-        // --- Event Listeners and Setup ---
-
-        modal.addEventListener('click', (e) => {
-            const contentBox = document.querySelector('#customizationModal > div');
-            if (contentBox && contentBox.contains(e.target) && e.target !== modal) {
-                e.stopPropagation();
-            }
-        });
-        imageModalEl.addEventListener('click', (e) => {
-            const contentBox = document.querySelector('#image-modal > div');
-            if (contentBox && contentBox.contains(e.target) && e.target !== imageModalEl) {
-                e.stopPropagation();
-            }
-        });
-
-        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-        imageModalEl.addEventListener('click', (e) => { if (e.target === imageModalEl) hideImageModal(); });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (modal.classList.contains('flex')) closeModal();
-                if (imageModalEl.classList.contains('flex')) hideImageModal();
-            }
-        });
-
-        userInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); 
-                sendMessage();
-            }
-        });
-
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto'; 
-            this.style.height = (this.scrollHeight) + 'px'; 
-        });
-        
-        window.onload = function() {
-            userInput.style.height = '25px';
-            initializeApp(); // Call the new initialization function
-        };
-        
-        // Exporting functions globally
-        window.textToSpeech = textToSpeech; 
-        window.promptForImage = promptForImage;
-        window.handleImageGeneration = handleImageGeneration;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
-        window.saveSystemPromptLocal = saveSystemPromptLocal; // Updated name
-        window.hideImageModal = hideImageModal;
 
     </script>
 </body>

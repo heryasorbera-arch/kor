@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرانيك - محادثات أدبية</title>
+    <title>الرانيك - محاور رفيع المستوى</title>
+    <!-- تضمين مكتبة Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Lucide Icons for the circular button -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Markdown-it library for parsing Markdown to HTML -->
     <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote/dist/markdown-it-footnote.min.js"></script>
@@ -13,17 +17,17 @@
     <!-- CSS for ultra-modern, high-contrast, developed chat styling -->
     <style>
         :root {
-            --bg-main: #F9FAFB; /* خلفية ناعمة جداً */
-            --bg-ai-container: #FFFFFF; /* خلفية رسائل الرانيك (واضحة) */
-            --bg-input: #FFFFFF; /* خلفية شريط الإدخال */
-            --text-color: #111827; /* نص داكن جداً لقراءة فائقة */
-            --accent-color: #10B981; /* لون بحري متطور */
-            --accent-hover: #059669;
+            --bg-main: #F9FAFB;
+            --bg-ai-container: #FFFFFF;
+            --bg-input: #FFFFFF;
+            --text-color: #111827;
+            --accent-color: #0077B6; /* لون بحري متطور */
+            --accent-hover: #005A8D;
             --icon-size: 35px;
             --radius-main: 12px;
+            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        /* خط نظيف وعصري يدعم العربية بوضوح */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -44,57 +48,52 @@
 
         .chat-container { flex-grow: 1; display: flex; flex-direction: column; width: 100%; }
         .main-chat-area { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
-        
+
         .chat-header {
-            padding: 20px;
-            text-align: center;
+            padding: 15px 20px;
             background-color: var(--bg-main);
             color: var(--text-color);
             font-size: 1.6rem;
             font-weight: 700;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             position: sticky;
             top: 0;
             z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
+        /* --- Scrolling and Messages Display (FIXED) --- */
         .messages-display {
             flex-grow: 1;
-            overflow-y: auto;
-            padding-bottom: 150px;
-            padding-top: 10px;
-            max-width: 800px;
-            margin: 0 auto; 
-            width: 100%;
+            overflow-y: auto; 
+            padding-bottom: 140px; /* مساحة كافية لتجنب تداخل شريط الإدخال الثابت */
         }
-
-        .message { 
-            display: flex; 
+        
+        /* Message Bubble Styling */
+        .message {
+            display: flex;
             align-items: flex-start;
-            padding: 20px 0; 
-            border-top: 1px solid #E5E7EB; /* خط فاصل خفيف جداً */
+            padding: 20px 0;
+            border-top: 1px solid #E5E7EB;
             margin-bottom: 0;
             padding-left: 20px;
             padding-right: 20px;
         }
-        
-        /* AI Message Container */
         .ai-message {
             background-color: var(--bg-ai-container);
             border-bottom: 1px solid #E5E7EB;
         }
-
-        /* User Message Container */
         .user-message {
-            background-color: var(--bg-main); /* لون الخلفية الرئيسي */
+            background-color: var(--bg-main);
             color: var(--text-color);
             border-bottom: 1px solid #E5E7EB;
         }
-
         .message-icon {
             width: var(--icon-size);
             height: var(--icon-size);
-            border-radius: 8px; /* مربع ناعم بدلاً من دائرة */
+            border-radius: 8px;
             background: var(--text-color);
             display: flex;
             align-items: center;
@@ -104,97 +103,117 @@
             flex-shrink: 0;
             margin-left: 20px;
         }
-
-        .user-message .message-icon { 
+        .user-message .message-icon {
             background: var(--accent-color);
         }
-
         .message-content {
             flex-grow: 1;
             padding-left: 10px;
             line-height: 1.7;
-            font-size: 1.05rem; /* حجم خط مريح ومطور */
+            font-size: 1.05rem;
             word-wrap: break-word;
+            min-width: 0;
         }
-        
-        .message-content p {
-            margin-bottom: 1em;
-            text-align: justify;
+
+        /* TTS Button Styling */
+        .tts-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #E5E7EB;
+            color: #4B5563;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s;
         }
-        
-        /* Table Styling - Clean and Highly Legible */
+        .tts-button i {
+            margin-left: 5px;
+        }
+        .tts-button:hover {
+            background-color: #D1D5DB;
+        }
+
+        /* --- Custom Markdown Table Styling (Protected Logic) --- */
         .message-content table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
-            color: var(--text-color);
-            border-radius: var(--radius-main);
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid #E5E7EB;
-        }
-        .message-content th, .message-content td {
-            padding: 14px 18px;
-            text-align: right;
-            border: 1px solid #F3F4F6; /* خطوط داخلية أفتح */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .message-content th {
-            background-color: var(--accent-color);
+            background-color: var(--accent-color); /* Header background */
             color: #FFFFFF;
+            padding: 12px 15px;
+            text-align: right;
             font-weight: 700;
-            font-size: 1rem;
+            border: 1px solid var(--accent-hover);
         }
-        .message-content tr:nth-child(even) {
-            background-color: #F9FAFB;
+        .message-content td {
+            padding: 10px 15px;
+            border: 1px solid #F3F4F6;
+            text-align: right;
+            font-size: 0.95rem;
         }
-        .message-content tr:hover td {
-            background-color: #EFF6FF;
+        .message-content tbody tr:nth-child(even) {
+            background-color: #FAFAFA;
+        }
+        .message-content tbody tr:hover {
+            background-color: #E6F0FF; /* Soft blue hover */
         }
 
+
+        /* --- Typing Indicator CSS FIX --- */
+        @keyframes blink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        .typing-indicator-dots .typing-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            margin-left: 5px; /* Adjust margin for RTL */
+            display: inline-block;
+            animation: blink 1.4s infinite both;
+        }
+        .typing-indicator-dots .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator-dots .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator-dots {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding-top: 10px;
+        }
+        .typing-indicator-wrapper {
+            min-height: 50px; /* Ensure space for the indicator */
+        }
+        
         /* Input Area - Floating and Central */
         .input-area-wrapper {
             position: fixed;
             bottom: 0;
             width: 100%;
             background: linear-gradient(to top, var(--bg-main) 90%, rgba(249, 250, 251, 0.8) 100%);
-            /* تم التعديل: إضافة هامش أفقي لضمان المسافة على حواف الشاشة */
-            padding: 15px 20px 25px 20px; 
+            padding: 15px 20px 25px 20px;
             z-index: 100;
         }
-
-        .feature-controls {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: right;
-            padding-bottom: 10px;
-            /* تم التعديل: إزالة الهوامش الأفقية المتعارضة */
-        }
-
-        #image-btn {
-            background-color: #6B7280;
-            color: #FFFFFF;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        #image-btn:hover { background-color: #4B5563; }
-
         .input-area {
             display: flex;
             max-width: 800px;
-            margin: 0 auto; /* هذا يضمن التوسيط */
+            margin: 0 auto;
             padding: 10px;
             background-color: var(--bg-input);
             border-radius: var(--radius-main);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-            align-items: flex-end; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            align-items: flex-end;
             border: 1px solid #D1D5DB;
-            /* تم التعديل: إزالة الهوامش الأفقية المتعارضة */
         }
-
         #user-input {
             flex-grow: 1;
             background-color: transparent;
@@ -203,15 +222,14 @@
             resize: none;
             font-size: 1.1rem;
             padding: 5px 10px;
-            min-height: 25px; 
-            max-height: 150px; 
+            min-height: 25px;
+            max-height: 150px;
             overflow-y: auto;
             line-height: 1.5;
             direction: rtl;
             text-align: right;
         }
         #user-input:focus { outline: none; }
-
         #send-btn {
             background-color: var(--accent-color);
             color: #FFFFFF;
@@ -226,226 +244,649 @@
             justify-content: center;
             transition: background-color 0.2s, transform 0.1s;
         }
-
         #send-btn:hover { background-color: var(--accent-hover); }
-        #send-btn:active { transform: scale(0.95); }
 
-        .disclaimer {
-            text-align: center;
-            font-size: 0.75rem;
-            color: #9CA3AF;
-            margin-top: 10px;
-        }
-
-        /* Typing Indicator - Three Dots as requested */
-        .typing-indicator-wrapper {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            background-color: #FFFFFF;
-            border-bottom: 1px solid #E5E7EB;
-            min-height: 75px; /* ensure height matches standard message */
-        }
-        .typing-indicator-dots {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-right: 15px;
-        }
-        .typing-indicator {
-            width: 8px;
-            height: 8px;
-            background-color: #6B7280;
+        /* Floating Image Generation Button (Sphere Button) */
+        #image-generator-btn {
+            position: fixed;
+            bottom: 120px; 
+            right: 20px; 
+            z-index: 90;
+            width: 55px;
+            height: 55px;
+            background-color: #6B7280; 
+            color: #FFFFFF;
+            border: none;
             border-radius: 50%;
-            animation: dot-bounce 1.4s infinite ease-in-out both;
-        }
-        .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes dot-bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-            40% { transform: scale(1.0); opacity: 1; }
-        }
-
-        /* AI Features Button (TTS) */
-        .ai-feature-buttons {
-            margin-top: 15px;
             display: flex;
-            gap: 5px;
-        }
-        .tts-button {
-            background-color: #F3F4F6;
-            color: var(--text-color);
-            border: 1px solid #E5E7EB;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: background-color 0.2s;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-        .tts-button:hover { background-color: #E5E7EB; }
-
-        /* Image Generation Styles */
-        .image-container {
-            margin-top: 20px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #D1D5DB;
-        }
-        .image-container img { width: 100%; height: auto; display: block; }
-        .loading-image {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            background-color: #FFFFFF;
-            height: 300px;
-            border-radius: 12px;
-            color: var(--accent-color);
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        #image-generator-btn:hover {
+            background-color: #4B5563;
+            transform: scale(1.1);
+        }
+        #image-generator-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        /* Mobile Adjustments - Removed conflicting margins */
-        @media (max-width: 600px) {
-            .message { padding-left: 10px; padding-right: 10px; }
-            .message-icon { margin-left: 10px; }
+        /* AI Name Label */
+        .ai-name-label {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 8px;
+            font-size: 0.8rem;
+            color: #6B7280;
         }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            #image-generator-btn {
+                bottom: 100px; 
+                right: 10px;
+            }
+        }
+        
+        /* Modal Overlay Style */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+        
+        /* Notification Styles */
+        #notification {
+            z-index: 1000;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        #notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Image container styles */
+        .ai-image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
     </style>
 </head>
 <body>
+    <!-- نظام الإشعارات المتطور -->
+    <div id="notification" class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md bg-emerald-500 text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 space-x-reverse" role="alert">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span id="notification-message" class="text-lg font-semibold">تم حفظ الأوامر بنجاح!</span>
+    </div>
+
     <div class="chat-container">
         <div class="main-chat-area">
             <div class="chat-header">
                 <h2>🖋️ الرانيك</h2>
+                <!-- زر أيقونة البرجر لفتح المودال -->
+                <button id="openModalBtn" onclick="openModal()"
+                    class="p-3 bg-white text-gray-800 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
+                    <!-- أيقونة البرجر (ثلاث شرطات) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
             </div>
-            
+
             <div class="messages-display" id="messages-display">
-                <!-- Initial Welcome Message - Updated -->
+                <!-- Initial Welcome Message (Updated after prompt loads) -->
                 <div class="message ai-message">
                     <div class="message-icon"><i class="fas fa-hat-wizard"></i></div>
                     <div class="message-content">
-                        <p>أهلاً بك أيها الكاتب المبدع! أنا **الرانيك**، النموذج المتطور للرواية والتحليل التاريخي.</p>
-                        <p>أنا هنا لأجيب على أي استفسار أدبي أو تاريخي بتفاصيل دقيقة وواقعية. تفضل بما تجول به أفكارك وسأقوم بتفصيلها فوراً.</p>
-                        <div class="ai-feature-buttons">
-                            <button class="tts-button" onclick="textToSpeech(this)">
-                                <i class="fas fa-volume-up"></i> قراءة
-                            </button>
-                        </div>
+                        <p>جاري تهيئة نظام الرانيك وتحميل أوامرك المخصصة...</p>
                     </div>
                 </div>
             </div>
 
+            <!-- Floating Image Generation Button (Sphere Button) -->
+            <button
+                id="image-generator-btn"
+                onclick="promptForImage()"
+                title="توليد صورة إبداعية"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);"><path d="m3 9 1.8 6M21 9l-1.8 6M10 20l2 2 2-2M15 2h2a2 2 0 0 1 2 2v2M5 2h2a2 2 0 0 0-2 2v2M4 12v3a6 6 0 0 0 12 0v-3M12 2v2"/></svg>
+            </button>
+
+
             <div class="input-area-wrapper">
-                <div class="feature-controls">
-                    <button id="image-btn" onclick="promptForImage()" title="توليد صورة للمشهد">
-                        <i class="fas fa-magic"></i> توليد صورة للمشهد
-                    </button>
-                </div>
                 <div class="input-area">
-                    <textarea id="user-input" placeholder="اكتب طلبك الأدبي أو تفاصيل روايتك المفضلة هنا..." rows="1"></textarea>
-                    <button id="send-btn" onclick="sendMessage()">
+                    <textarea id="user-input" placeholder="اكتب طلبك الأدبي الرفيع، أو اطلب جدول (مقارنة/تصنيف/مالي) وسيظهر محدثاً بشكل متطور..." rows="1" disabled></textarea>
+                    <button id="send-btn" onclick="sendMessage()" disabled>
                         <i class="fas fa-arrow-up"></i>
                     </button>
                 </div>
-                <p class="disclaimer">هذا النظام يتصل بنموذج ذكاء اصطناعي حقيقي لإنشاء محتوى إبداعي.</p>
+                <!-- AI Name Label (مساعد هرياسور) -->
+                <div class="ai-name-label">
+                    مدعوم من **مساعد هرياسور** - إصدار (AI)
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- JavaScript for API calls and chat logic -->
-    <script>
-        // API key and URL for the Gemini model
-        const apiKey = "AIzaSyCN7xfp3Jzsb9CzQWzk9Tiyi-RfbSDiAUg";
-        const textApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=" + apiKey;
-        const ttsApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=" + apiKey;
-        // API for image generation (Imagen 3.0)
-        const imageApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=" + apiKey;
 
-        const md = window.markdownit();
+    <!-- مودال تخصيص الأوامر المطوَّر -->
+    <div id="customizationModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl transform transition-all duration-300 scale-100 opacity-100">
+
+            <!-- عنوان المودال -->
+            <div class="flex justify-between items-center pb-4 border-b border-gray-100 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">تخصيص أوامر الرانيك (System Prompt)</h2>
+                <!-- زر إغلاق صغير في الزاوية (X) -->
+                <button id="closeModalCross" onclick="closeModal()" class="text-gray-400 hover:text-gray-700 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- محتوى تخصيص الأوامر: صندوق النص الكبير -->
+            <div class="space-y-4">
+                <p class="text-gray-600">هنا يمكنك تعديل الأوامر الأساسية للرانيك، لتغيير شخصيته وأسلوبه. (يتم تحميل الأوامر المحفوظة من السحابة).</p>
+
+                <textarea id="system-prompt-textarea" rows="10"
+                    class="w-full p-4 border border-gray-300 rounded-lg shadow-inner focus:border-indigo-500 focus:ring-indigo-500 text-sm resize-vertical"
+                    style="direction: rtl; text-align: right;"></textarea>
+                <p class="text-sm text-gray-500 mt-2 text-right">معرف المستخدم الحالي: <span id="modal-user-id" class="font-mono text-xs text-indigo-500">جاري التحميل...</span></p>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-4">
+                <!-- زر الإغلاق المطوَّر -->
+                <button id="closeModalBtn" onclick="closeModal()"
+                    class="close-btn-modern px-6 py-3 bg-red-500 text-white font-semibold rounded-xl shadow-lg hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75">
+                    إلغاء/إغلاق
+                </button>
+
+                <!-- زر حفظ الأوامر المتطور -->
+                <button id="saveCommandsBtn" onclick="saveSystemPrompt()"
+                    class="save-btn-modern px-6 py-3 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01] bg-gradient-to-r from-sky-500 to-indigo-600 disabled:opacity-50">
+                    <span id="save-btn-text">حفظ الأوامر</span>
+                    <div id="save-spinner" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white hidden ml-2"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Image Generation is retained -->
+    <div id="image-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg transition-all transform scale-100 opacity-100">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">توليد صورة إبداعية بواسطة هرياسور</h2>
+            <p class="text-sm text-gray-600 mb-4">صف المشهد الذي ترغب في أن يقوم الرانيك برسمه بدقة عالية.</p>
+            <textarea
+                id="image-prompt-input"
+                class="w-full resize-none border border-gray-300 rounded-lg p-3 mb-4 focus:ring-indigo-500 focus:border-indigo-500"
+                rows="4"
+                placeholder="مثال: فارس عربي يمتطي حصاناً أبيض في صحراء واسعة تحت سماء مليئة بالنجوم، بأسلوب فن رقمي مفصل."
+                style="direction: rtl; text-align: right;"
+            ></textarea>
+            <div id="image-error-message" class="text-red-500 text-sm mb-4 hidden"></div>
+            <div class="flex justify-end space-x-3 space-x-reverse">
+                <button
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors"
+                    onclick="hideImageModal()"
+                >
+                    إلغاء
+                </button>
+                <button
+                    id="generate-image-btn-modal"
+                    class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+                    onclick="handleImageGeneration()"
+                >
+                    توليد الصورة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex flex-col items-center justify-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+        <p class="text-white text-lg mt-4" id="loading-text">جاري العمل...</p>
+    </div>
+
+
+    <!-- JavaScript for API calls and chat/storage logic -->
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+        // Global environment variables
+        var __app_id_raw = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        var __firebase_config_raw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        var __initial_auth_token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
+
+        // API key and URLs
+        const apiKey = "";
+        const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
+        const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+        const IMAGE_MODEL = 'imagen-3.0-generate-002';
+        const apiUrlBase = "https://generativelanguage.googleapis.com/v1beta/models/";
+        
+        const textApiUrl = `${apiUrlBase}${CHAT_MODEL}:generateContent?key=${apiKey}`;
+        const ttsApiUrl = `${apiUrlBase}${TTS_MODEL}:generateContent?key=${apiKey}`;
+        const imageApiUrl = `${apiUrlBase}${IMAGE_MODEL}:predict?key=${apiKey}`;
+
+        // Firebase variables
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+
+        // Initialize Markdown parser
+        const md = window.markdownit({ html: true, linkify: true, typographer: true });
 
         let chatHistory = [];
+        
+        // --- Default System Prompt (CRITICALLY UPDATED for permanent, mandatory table generation) ---
+        // ملاحظة: هذا التوجيه الأساسي للجدول محمي وغير قابل للتعديل بناءً على طلب المستخدم.
+        let systemPrompt = "أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. \n\n**التوجيه الأساسي للبرمجة الداخلية - الجداول:** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. يجب أن يتضمن الجدول أعمدة واضحة وعناوين جذابة.\n\n**القاعدة العامة:** ممنوع منعاً باتاً إخراج أي وسوم HTML صريحة مثل <p> أو <strong> أو أي علامات غير مارك داون. يجب أن يكون الناتج نصاً نقياً ومنسقاً فقط بالمارك داون.";
 
-        // ******** النظام الأساسي للرانيك - قواعد ثابتة لا تتغير ********
-        const systemPrompt = "أنت الرانيك، روائي عبقري ومؤرخ دقيق. مهمتك هي كتابة روايات وسيناريوهات غاية في الواقعية والتفصيل، مع التركيز على الدقة التاريخية المطلقة. **اللغة الأساسية والوحيدة للردود هي العربية الفصحى، التزم بها التزاماً مطلقاً ولا تستخدم أي لغة أخرى بما في ذلك الإنجليزية، حتى عند التعامل مع مصطلحات أجنبية. ردودك يجب أن تكون فورية وسريعة جداً. لا تتأخر في الرد أبداً.** عندما يُطلب منك وصف حدث تاريخي، مثل حرب، أن يكون سردك مطابقاً للحقيقة تماماً، بما في ذلك التفاصيل الدقيقة مثل المعدات العسكرية، الصفقات، أو حتى تحركات الجيوش. يجب أن تكون ذكياً جداً ومتفهماً لكل طلب، وأن تستطيع استنتاج التفاصيل الواقعية حتى لو لم يذكرها المستخدم صراحة. استخدم أسلوباً فخماً ومتقناً في كل كتاباتك. **الالتزام المطلق للجدول:** عندما يُطلب منك أي **مقارنة**، أو **تصنيف**، أو عرض **خسائر**، يجب عليك **فوراً** استخدام جدول Markdown. **أمر صارم حول محتوى الجدول:** يجب أن تكون كل خلية في الجدول تحتوي على القيمة الحقيقية والمحددة **فقط**، دون أي وصف أو إطالة. **يجب أن تكون البيانات واقعية جداً، وتفصيلية، ومطابقة مباشرة لاسم العمود/الصف (مثل: 75 كم/س، 120 مم، 8000 جندي). لا تترك خانة فارغة أبداً.** يجب استخدام معدات عسكرية حقيقية ومعاصرة (مثل F-35، T-90، إلخ) وتفاصيل واقعية ومحددة (مثل مدى، سرعة، حمولة). **افصل كل نقطة مقارنة في سطر منفصل وواضح**، مثل: 'القوة البشرية', 'القوات العاملة', 'القوات الاحتياطية', 'الميزانية الدفاعية', 'القوات البرية', 'القوات الجوية', 'القوات البحرية', و'القدرات التكنولوجية'. هذا يضمن أعلى مستوى من الدقة والذكاء في العرض.";
-        // *************************************************************
+        // جلب عناصر الواجهة
+        const modal = document.getElementById('customizationModal');
+        const systemPromptTextarea = document.getElementById('system-prompt-textarea');
+        const imageModalEl = document.getElementById('image-modal');
+        const imagePromptInputEl = document.getElementById('image-prompt-input');
+        const imageErrorMessageEl = document.getElementById('image-error-message');
+        const loadingOverlayEl = document.getElementById('loading-overlay');
+        const messagesDisplay = document.getElementById('messages-display');
+        const sendBtn = document.getElementById('send-btn');
+        const userInput = document.getElementById('user-input');
+        const notificationElement = document.getElementById('notification');
+        const saveCommandsBtn = document.getElementById('saveCommandsBtn');
+        const saveBtnText = document.getElementById('save-btn-text');
+        const saveSpinner = document.getElementById('save-spinner');
+        const modalUserIdDisplay = document.getElementById('modal-user-id');
+
+        // --- Shared Utility Functions ---
+
+        /**
+         * Generic fetch wrapper with exponential backoff 
+         */
+        async function fetchWithBackoff(url, options, retries = 5) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    
+                    if (response.status === 429) {
+                        throw new Error("Rate limit exceeded (429)");
+                    }
+                    
+                    const responseText = await response.text();
+                    
+                    if (!response.ok) {
+                        let errorMessage = `HTTP error! status: ${response.status}`;
+                        try {
+                            const errorBody = JSON.parse(responseText);
+                            errorMessage += ` - ${errorBody.error?.message || response.statusText}`;
+                        } catch (e) {
+                            errorMessage += ` - ${response.statusText} (Raw body: ${responseText.substring(0, 100)})`;
+                        }
+                        throw new Error(errorMessage);
+                    }
+
+                    if (!responseText) {
+                        console.warn("Received successful response (2xx) but the body was empty.");
+                        return {};
+                    }
+
+                    return JSON.parse(responseText);
+
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    console.log(`Retry ${i + 1}/${retries} for API call due to error: ${error.message}. Delaying for ${delay.toFixed(0)}ms.`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+        
+        /**
+         * دالة لإظهار الإشعار المتطور
+         */
+        function showNotification(message, type = 'success') {
+            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+            const iconHtml = type === 'success' 
+                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>'
+                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-octagon"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/></svg>';
+
+            notificationElement.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 space-x-reverse ${bgColor}`;
+            notificationElement.innerHTML = `${iconHtml}<span id="notification-message" class="text-lg font-semibold">${message}</span>`;
+            
+            notificationElement.classList.add('show');
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000); 
+        }
+
+        function showLoading(text) {
+            document.getElementById('loading-text').textContent = text;
+            loadingOverlayEl.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            loadingOverlayEl.classList.add('hidden');
+        }
+
+        /**
+         * Function to add messages to the chat display, returning the content element for dynamic updates.
+         */
+        function addMessage(content, isAI, skipFeatures = false) {
+            const messageDiv = document.createElement('div');
+            
+            if (isAI && content.includes('typing-indicator-dots')) {
+                messageDiv.className = `message ai-message typing-indicator-wrapper`;
+            } else {
+                messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
+            }
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'message-icon';
+            iconDiv.innerHTML = isAI ? '<i class="fas fa-hat-wizard"></i>' : '<i class="fas fa-user-circle"></i>';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            if (isAI && content.includes('typing-indicator-dots')) {
+                contentDiv.innerHTML = content;
+            } else {
+                contentDiv.innerHTML = content;
+            }
+            
+            messageDiv.appendChild(iconDiv);
+            messageDiv.appendChild(contentDiv);
+            messagesDisplay.appendChild(messageDiv);
+            messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
+            
+            return { messageDiv, contentDiv };
+        }
+
+        // --- Firestore Setup and Logic ---
+
+        function getSystemPromptPath(uid) {
+            return `artifacts/${__app_id_raw}/users/${uid}/system_settings/alranik_prompt`;
+        }
+
+        function initializeFirebase() {
+            let firebaseConfig = null;
+
+            if (!__firebase_config_raw) {
+                console.error("Firebase config is missing. Saving and loading features are disabled.");
+                enableChatUI(false); 
+                document.getElementById('saveCommandsBtn').disabled = true;
+                document.getElementById('saveCommandsBtn').querySelector('span').textContent = "الحفظ معطّل";
+                modalUserIdDisplay.textContent = "غير متاح (خطأ في الاتصال)";
+                return;
+            }
+
+            try {
+                firebaseConfig = JSON.parse(__firebase_config_raw);
+                if (Object.keys(firebaseConfig).length === 0) {
+                     throw new Error("Parsed config is empty.");
+                }
+
+                setLogLevel('debug');
+                
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        modalUserIdDisplay.textContent = userId;
+                        await loadSystemPrompt();
+                        enableChatUI(true, true); 
+                    } else {
+                        if (__initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("خطأ في تهيئة Firebase:", error);
+                enableChatUI(true, false); 
+                document.getElementById('saveCommandsBtn').disabled = true;
+                document.getElementById('saveCommandsBtn').querySelector('span').textContent = "الحفظ معطّل";
+                modalUserIdDisplay.textContent = "خطأ في الاتصال";
+            }
+        }
+        
+        function enableChatUI(isChatActive, isFirebaseActive) {
+            userInput.disabled = !isChatActive;
+            sendBtn.disabled = !isChatActive;
+            document.getElementById('image-generator-btn').disabled = !isChatActive;
+            
+            const welcomeMessageEl = messagesDisplay.querySelector('.message.ai-message .message-content p');
+            if(welcomeMessageEl && welcomeMessageEl.textContent.includes('جاري تهيئة')) {
+                const firebaseStatusNote = isFirebaseActive ? 
+                    'لقد تم تحميل أوامرك المخصصة بنجاح. يمكنك الآن حفظ وتعديل إعدادات الرانيك الخاصة بك.' :
+                    'تنبيه: خاصية حفظ الأوامر وإعدادات المستخدم غير متاحة حالياً بسبب خطأ في إعدادات الاتصال.';
+
+                 // Use the existing contentDiv (parent element of welcomeMessageEl)
+                 const contentDiv = welcomeMessageEl.parentElement;
+                 
+                 const welcomeText = `
+                    <p>أهلاً بك! أنا **الرانيك**، محاور رفيع المستوى وأديب حصيف. أسلوبي متطور جداً ولن أخرج عن مساري مطلقاً. يمكنك التحدث معي حول أي موضوع. لقد تم الآن **برمجتي داخلياً** لإنشاء **جداول متطورة ومنظمة** تلقائيًا عند طلب مقارنة أو تصنيف أو تقرير مالي.</p>
+                    <p><strong>${firebaseStatusNote}</strong></p>
+                 `;
+
+                 // Use the renderStandardContent logic to finalize the initial message
+                 renderStandardContent(contentDiv, welcomeText);
+            }
+        }
+
+        async function loadSystemPrompt() {
+            if (!db || !userId) return;
+
+            try {
+                const promptDocRef = doc(db, getSystemPromptPath(userId));
+                const docSnap = await getDoc(promptDocRef);
+
+                if (docSnap.exists()) {
+                    const savedPrompt = docSnap.data().prompt;
+                    if (savedPrompt && typeof savedPrompt === 'string') {
+                        // Load saved prompt, but the fixed table instruction is already hardcoded in the default
+                        systemPrompt = savedPrompt;
+                    }
+                } 
+            } catch (error) {
+                console.error("Error loading system prompt:", error);
+            }
+        }
+
+        // --- Customization Modal Functions ---
+
+        function openModal() {
+            systemPromptTextarea.value = systemPrompt; 
+            modal.classList.remove('hidden'); 
+            modal.classList.add('flex');
+            systemPromptTextarea.focus();
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function saveSystemPrompt() {
+            if (!isAuthReady || !userId || !db) {
+                showNotification("خطأ: نظام الحفظ غير جاهز أو معطّل.", 'error');
+                return;
+            }
+
+            const newPrompt = systemPromptTextarea.value.trim();
+            
+            if (!newPrompt) {
+                showNotification('خطأ: لا يمكن حفظ الأوامر وهي فارغة.', 'error');
+                return;
+            }
+
+            saveCommandsBtn.disabled = true;
+            saveBtnText.textContent = 'جاري الحفظ...';
+            saveSpinner.classList.remove('hidden');
+
+            try {
+                const promptDocRef = doc(db, getSystemPromptPath(userId));
+                
+                await setDoc(promptDocRef, {
+                    prompt: newPrompt,
+                    lastUpdated: serverTimestamp(),
+                    userId: userId
+                });
+
+                systemPrompt = newPrompt; 
+                showNotification("تم حفظ الأوامر المخصصة بنجاح!");
+                
+                closeModal();
+            
+            } catch (error) {
+                console.error("خطأ في حفظ الأمر:", error);
+                showNotification(`خطأ: فشل الحفظ. ${error.message}`, 'error');
+            } finally {
+                saveCommandsBtn.disabled = false;
+                saveBtnText.textContent = 'حفظ الأوامر';
+                saveSpinner.classList.add('hidden');
+            }
+        }
+
+        // --- Core Content Rendering Logic (CRITICALLY UPDATED for Sanitization) ---
+        
+        /**
+         * دالة لتنقية الناتج من أي وسوم HTML أو فراغات غير مرغوبة قبل عرضها.
+         * هذا يضمن إزالة أي <p> أو <strong> قد يولدها النموذج خطأً.
+         */
+        function sanitizeOutput(rawText) {
+            let cleanText = rawText.trim();
+            // 1. Remove leading/trailing <p> and </p> tags
+            cleanText = cleanText.replace(/^(<p>|<\/p>|<p><strong>|<strong>)/i, '').replace(/(<\/p>|<strong><\/p>|<strong>|<\/strong>)$/i, '');
+            // 2. Replace any remaining <strong> with ** (optional, markdownit should handle it)
+            cleanText = cleanText.replace(/<strong>/gi, '**').replace(/<\/strong>/gi, '**');
+            // 3. Remove leading/trailing quotes sometimes added by the model
+            cleanText = cleanText.replace(/^"|"$/g, '').trim();
+
+            return cleanText;
+        }
+
+        /**
+         * Applies Markdown formatting and adds the TTS button to a contentDiv.
+         * @param {HTMLElement} contentDiv - The target element.
+         * @param {string} rawText - The text content to render.
+         */
+        function renderStandardContent(contentDiv, rawText) {
+            // Apply the sanitization BEFORE rendering Markdown
+            const sanitizedText = sanitizeOutput(rawText);
+            
+            // Markdown-it handles the pure Markdown tables correctly.
+            const processedContent = md.render(sanitizedText);
+            contentDiv.innerHTML = processedContent;
+
+            // TTS button logic
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'ai-feature-buttons';
+            const ttsButton = document.createElement('button');
+            ttsButton.className = 'tts-button';
+            ttsButton.innerHTML = '<i class="fas fa-volume-up"></i> قراءة';
+            ttsButton.onclick = () => textToSpeech(ttsButton);
+            buttonContainer.appendChild(ttsButton);
+            
+            contentDiv.appendChild(buttonContainer);
+        }
+
+        // --- Chat Functions (CLEANED) ---
 
         async function sendMessage() {
-            const inputField = document.getElementById('user-input');
-            const sendBtn = document.getElementById('send-btn');
-            const userPrompt = inputField.value.trim();
+            const userPrompt = userInput.value.trim();
 
-            if (userPrompt === "") return;
+            if (userPrompt === "" || userInput.disabled) return;
 
-            // Display user message
+            // 1. Display user message
             addMessage(userPrompt, false);
-            inputField.value = '';
-            inputField.style.height = '25px';
+            userInput.value = '';
+            userInput.style.height = '25px';
 
-            // Show typing indicator (three dots)
-            const typingIndicatorMessage = addMessage(
-                '<div class="typing-indicator-dots"><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div></div>', 
+            // 2. Show typing indicator 
+            const { contentDiv } = addMessage(
+                '<div class="typing-indicator-dots"><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div></div>',
                 true,
-                true // Skip features (TTS) for loading message
+                true 
             );
             sendBtn.disabled = true;
-            inputField.disabled = true;
-            document.getElementById('image-btn').disabled = true;
+            userInput.disabled = true;
+            document.getElementById('image-generator-btn').disabled = true;
 
-            // Add the user's message to the chat history
+            // 3. Prepare Payload (Standard Chat mode only)
             chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
-
+            
             const payload = {
                 contents: chatHistory,
                 systemInstruction: { parts: [{ text: systemPrompt }] },
+                tools: [{ "google_search": {} }],
             };
             
             try {
-                // Send the request to the Gemini API
-                const response = await fetch(textApiUrl, {
+                const response = await fetchWithBackoff(textApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const result = await response.json();
-                
+
+                const result = response;
+
                 if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-                    const aiResponse = result.candidates[0].content.parts[0].text;
+                    const rawResponse = result.candidates[0].content.parts[0].text;
                     
-                    // Remove the typing indicator and add the AI's response
-                    typingIndicatorMessage.remove();
-                    addMessage(aiResponse, true); // Pass raw response to be handled by addMessage
-                    chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                    // 4. Render Standard Content (Sanitization applied inside renderStandardContent)
+                    contentDiv.innerHTML = ''; // Clear loading dots
+                    renderStandardContent(contentDiv, rawResponse); 
+                    chatHistory.push({ role: "model", parts: [{ text: rawResponse }] });
+                    
                 } else {
-                    typingIndicatorMessage.remove();
-                    addMessage("عذراً، لم يتمكن الرانيك من إرسال رد. يرجى المحاولة مرة أخرى.", true);
+                    contentDiv.innerHTML = "عذراً، لم يتمكن الرانيك من إرسال رد. يرجى المحاولة مرة أخرى.";
                 }
 
             } catch (error) {
-                console.error('Error fetching AI response:', error);
-                typingIndicatorMessage.remove();
-                addMessage("حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى.", true);
+                 console.error('Error fetching AI response:', error);
+                 contentDiv.innerHTML = "حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى.";
+                 chatHistory.push({ role: "model", parts: [{ text: "حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى." }] });
+
             } finally {
-                // Re-enable input and button regardless of success or failure
                 sendBtn.disabled = false;
-                inputField.disabled = false;
-                document.getElementById('image-btn').disabled = false;
+                userInput.disabled = false;
+                document.getElementById('image-generator-btn').disabled = false;
+                messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
             }
         }
 
-        /**
-         * Converts base64 encoded PCM audio data to a WAV Blob.
-         */
-        function pcmToWav(base64Data, sampleRate) {
-            const audioData = atob(base64Data);
-            const pcmData = new Int16Array(audioData.length / 2);
+        // --- TTS Functions (Unchanged) ---
 
-            for (let i = 0; i < audioData.length / 2; i++) {
-                const byte1 = audioData.charCodeAt(2 * i);
-                const byte2 = audioData.charCodeAt(2 * i + 1);
-                pcmData[i] = (byte2 << 8) | byte1;
+        function pcmToWav(base64Data, sampleRate) {
+            const audioString = atob(base64Data);
+            const pcmDataLength = audioString.length / 2;
+            const pcmData = new Int16Array(pcmDataLength);
+            for (let i = 0; i < pcmDataLength; i++) {
+                const byte1 = audioString.charCodeAt(2 * i);
+                const byte2 = audioString.charCodeAt(2 * i + 1);
+                pcmData[i] = (byte2 << 8) | byte1; 
             }
             
             const numChannels = 1;
@@ -457,21 +898,23 @@
             const buffer = new ArrayBuffer(44 + dataSize);
             const view = new DataView(buffer);
 
-            // WAV header
             let offset = 0;
             const writeString = (str) => {
                 for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
                 offset += str.length;
             };
 
+            // RIFF header
             writeString('RIFF'); 
             view.setUint32(offset, 36 + dataSize, true); 
             offset += 4;
             writeString('WAVE'); 
+            
+            // FMT chunk
             writeString('fmt '); 
             view.setUint32(offset, 16, true); 
             offset += 4;
-            view.setUint16(offset, 1, true); 
+            view.setUint16(offset, 1, true); // Audio format 1 (PCM)
             offset += 2;
             view.setUint16(offset, numChannels, true); 
             offset += 2;
@@ -483,29 +926,34 @@
             offset += 2;
             view.setUint16(offset, bitsPerSample, true); 
             offset += 2;
+            
+            // DATA chunk
             writeString('data'); 
             view.setUint32(offset, dataSize, true); 
             offset += 4;
 
             // Write PCM data
             for (let i = 0; i < pcmData.length; i++) {
-                view.setInt16(offset, pcmData[i], true);
+                view.setInt16(offset, pcmData[i], true); 
                 offset += 2;
             }
 
             return new Blob([view], { type: 'audio/wav' });
         }
 
+
         async function textToSpeech(button) {
             const messageContentElement = button.closest('.message-content');
-            let messageContent = messageContentElement.textContent.trim();
             
-            const featureButtons = messageContentElement.querySelector('.ai-feature-buttons');
-            if (featureButtons) {
-                const tempClone = messageContentElement.cloneNode(true);
-                tempClone.querySelector('.ai-feature-buttons')?.remove();
-                messageContent = tempClone.textContent.trim();
-            }
+            const tempClone = messageContentElement.cloneNode(true);
+            // Remove feature buttons from clone for clean text
+            tempClone.querySelector('.ai-feature-buttons')?.remove();
+
+            let messageContent = tempClone.textContent.trim();
+            
+            // Remove any markdown special characters for cleaner TTS
+            messageContent = messageContent.replace(/\*\*|__|#|`/g, '');
+            messageContent = messageContent.substring(0, 1000); 
 
             if (!messageContent) return;
 
@@ -526,31 +974,40 @@
                         }
                     }
                 },
-                model: "gemini-2.5-flash-preview-tts"
+                model: TTS_MODEL
             };
 
             try {
-                const response = await fetch(ttsApiUrl, {
+                const result = await fetchWithBackoff(ttsApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const result = await response.json();
+                
                 const part = result?.candidates?.[0]?.content?.parts?.[0];
                 const audioData = part?.inlineData?.data;
                 const mimeType = part?.inlineData?.mimeType;
 
                 if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
-                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
                     const wavBlob = pcmToWav(audioData, sampleRate);
                     const audioUrl = URL.createObjectURL(wavBlob);
                     const audio = new Audio(audioUrl);
+                    
+                    audio.onended = () => {
+                        icon.classList.remove('fa-spinner', 'fa-spin');
+                        icon.classList.add('fa-volume-up');
+                        button.disabled = false;
+                    };
                     audio.play();
                 } else {
                     console.error("Invalid audio data received.");
+                    showNotification('فشل توليد الصوت. قد تكون المشكلة في النص.', 'error');
                 }
             } catch (error) {
                 console.error('Error with TTS:', error);
+                showNotification('حدث خطأ أثناء محاولة القراءة الصوتية.', 'error');
             } finally {
                 icon.classList.remove('fa-spinner', 'fa-spin');
                 icon.classList.add('fa-volume-up');
@@ -558,163 +1015,139 @@
             }
         }
 
-        async function generateImage(userPrompt) {
-            const enhancedPrompt = userPrompt + ", cinematic, highly detailed, fantasy digital painting, 4k";
+        // --- Image Generation Functions (Unchanged) ---
+        
+        function hideImageModal() {
+            imageModalEl.classList.add('hidden');
+            imageModalEl.classList.remove('flex');
+        }
+        
+        function promptForImage() {
+            // Populate with the last user prompt if available
+            const lastUserPrompt = chatHistory.slice().reverse().find(msg => msg.role === 'user')?.parts[0]?.text || '';
+            imagePromptInputEl.value = lastUserPrompt;
 
-            const payload = { 
-                instances: [{ prompt: enhancedPrompt }],
-                parameters: { "sampleCount": 1 } 
-            };
-            
-            let attempts = 0;
-            const maxAttempts = 5;
-            let delay = 1000; 
-
-            while (attempts < maxAttempts) {
-                try {
-                    const response = await fetch(imageApiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.status === 429) { 
-                        attempts++;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; 
-                        continue;
-                    }
-
-                    const result = await response.json();
-                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                    } else {
-                        console.error("Image generation failed with no base64 data:", result);
-                        return null;
-                    }
-                } catch (error) {
-                    attempts++;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                    if (attempts >= maxAttempts) throw error; 
-                }
-            }
-            return null;
+            imageErrorMessageEl.classList.add('hidden');
+            imageModalEl.classList.remove('hidden');
+            imageModalEl.classList.add('flex');
+            imagePromptInputEl.focus();
         }
 
-        async function promptForImage() {
-            const prompt = window.prompt("ما هو المشهد الذي تريد أن يرسمه الرانيك؟ (مثال: سفينة فضاء تحلق فوق كوكب أحمر في عاصفة رملية، فن رقمي)");
-            if (!prompt || prompt.trim() === "") return;
+        async function handleImageGeneration() {
+            const prompt = imagePromptInputEl.value.trim();
+            if (!prompt) {
+                imageErrorMessageEl.textContent = 'يرجى إدخال وصف تفصيلي للصورة.';
+                imageErrorMessageEl.classList.remove('hidden');
+                return;
+            }
 
-            addMessage(`طلب صورة: ${prompt}`, false);
+            hideImageModal();
 
-            const loadingMessage = addMessage(
-                '<div class="typing-indicator-dots"><i class="fas fa-palette fa-spin" style="margin-left: 10px; color: var(--accent-color);"></i></div>',
-                true,
-                true
-            );
-            
-            const sendBtn = document.getElementById('send-btn');
-            const inputField = document.getElementById('user-input');
-            const imageBtn = document.getElementById('image-btn');
+            addMessage(`**طلب توليد صورة:** ${prompt}`, false);
+
+            showLoading("جاري توليد صورتك الإبداعية، قد يستغرق هذا بضع ثوانٍ...");
+
             sendBtn.disabled = true;
-            inputField.disabled = true;
-            imageBtn.disabled = true;
+            userInput.disabled = true;
+            document.getElementById('image-generator-btn').disabled = true;
 
             try {
                 const imageUrl = await generateImage(prompt);
                 
-                loadingMessage.remove();
-
                 if (imageUrl) {
-                    addMessage(`<p>رسم الرانيك هذا المشهد بناءً على طلبك:</p><div class="image-container"><img src="${imageUrl}" alt="${prompt}"></div>`, true);
+                    const imageHtml = `
+                        <p>رسم **مساعد هرياسور** هذا المشهد بناءً على طلبك:</p>
+                        <div class="ai-image-container">
+                            <img src="${imageUrl}" alt="${prompt}">
+                        </div>`;
+                    // Use renderStandardContent here for consistency (though it doesn't hurt much)
+                    const { contentDiv } = addMessage('', true);
+                    contentDiv.innerHTML = imageHtml;
                 } else {
-                    addMessage("عذراً، لم يتمكن الرانيك من توليد الصورة المطلوبة. يرجى محاولة وصف آخر.", true);
+                    addMessage("عذراً، لم يتمكن مساعد هرياسور من توليد الصورة المطلوبة. يرجى محاولة وصف آخر.", true);
                 }
-
             } catch (error) {
                 console.error("Error generating image:", error);
-                loadingMessage.remove();
                 addMessage("حدث خطأ أثناء توليد الصورة. يرجى المحاولة مرة أخرى.", true);
             } finally {
+                hideLoading();
                 sendBtn.disabled = false;
-                inputField.disabled = false;
-                imageBtn.disabled = false;
+                userInput.disabled = false;
+                document.getElementById('image-generator-btn').disabled = false;
             }
         }
-        
-        // Function to add messages to the chat display
-        function addMessage(content, isAI, skipFeatures = false) {
-            const display = document.getElementById('messages-display');
-            const messageDiv = document.createElement('div');
+
+        async function generateImage(userPrompt) {
+            const enhancedPrompt = `High-quality, cinematic digital art, hyper-detailed, dramatic lighting. Depicts: ${userPrompt}`;
+
+            const payload = { 
+                instances: { prompt: enhancedPrompt },
+                parameters: { "sampleCount": 1 } 
+            };
             
-            if (isAI && content.includes('typing-indicator-dots')) {
-                // Special handling for the typing indicator
-                messageDiv.className = `message ai-message typing-indicator-wrapper`;
-                
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'message-icon';
-                iconDiv.innerHTML = '<i class="fas fa-hat-wizard"></i>';
+            const result = await fetchWithBackoff(imageApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-                const contentDiv = document.createElement('div');
-                contentDiv.innerHTML = content;
-                
-                messageDiv.appendChild(iconDiv);
-                messageDiv.appendChild(contentDiv);
-            } else {
-                // Standard message bubble
-                messageDiv.className = `message ${isAI ? 'ai-message' : 'user-message'}`;
-
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'message-icon';
-                iconDiv.innerHTML = isAI ? '<i class="fas fa-hat-wizard"></i>' : '<i class="fas fa-user-circle"></i>';
-
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-                
-                // 1. Process Content (Markdown rendering)
-                const processedContent = isAI && !skipFeatures ? md.render(content) : content;
-                contentDiv.innerHTML = processedContent; // <-- تم التغيير: نضع المحتوى النظيف مباشرة
-
-                // 2. Add TTS button to AI messages, unless skipped (appended after content)
-                if (isAI && !skipFeatures) { 
-                    const buttonContainer = document.createElement('div');
-                    buttonContainer.className = 'ai-feature-buttons';
-                    const ttsButton = document.createElement('button');
-                    ttsButton.className = 'tts-button';
-                    ttsButton.innerHTML = '<i class="fas fa-volume-up"></i> قراءة';
-                    ttsButton.onclick = () => textToSpeech(ttsButton);
-                    buttonContainer.appendChild(ttsButton);
-                    
-                    // Append the buttons after the content has been set
-                    contentDiv.appendChild(buttonContainer);
-                }
-                
-                messageDiv.appendChild(iconDiv);
-                messageDiv.appendChild(contentDiv);
+            if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
             }
-
-            display.appendChild(messageDiv);
-            display.scrollTop = display.scrollHeight;
-            return messageDiv;
+            return null;
         }
 
-        document.getElementById('user-input').addEventListener('keypress', function(e) {
+
+        // --- Event Listeners and Setup ---
+
+        modal.addEventListener('click', (e) => {
+            const contentBox = document.querySelector('#customizationModal > div');
+            if (contentBox && contentBox.contains(e.target) && e.target !== modal) {
+                e.stopPropagation();
+            }
+        });
+        imageModalEl.addEventListener('click', (e) => {
+            const contentBox = document.querySelector('#image-modal > div');
+            if (contentBox && contentBox.contains(e.target) && e.target !== imageModalEl) {
+                e.stopPropagation();
+            }
+        });
+
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        imageModalEl.addEventListener('click', (e) => { if (e.target === imageModalEl) hideImageModal(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (modal.classList.contains('flex')) closeModal();
+                if (imageModalEl.classList.contains('flex')) hideImageModal();
+            }
+        });
+
+        userInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault(); 
                 sendMessage();
             }
         });
 
-        document.getElementById('user-input').addEventListener('input', function() {
+        userInput.addEventListener('input', function() {
             this.style.height = 'auto'; 
             this.style.height = (this.scrollHeight) + 'px'; 
         });
         
         window.onload = function() {
-            const inputField = document.getElementById('user-input');
-            inputField.style.height = '25px';
+            userInput.style.height = '25px';
+            initializeFirebase();
         };
+        
+        window.textToSpeech = textToSpeech; 
+        window.promptForImage = promptForImage;
+        window.handleImageGeneration = handleImageGeneration;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.saveSystemPrompt = saveSystemPrompt;
+        window.hideImageModal = hideImageModal;
+
     </script>
 </body>
 </html>

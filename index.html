@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرانيك - محاور رفيع المستوى (نسخة عالية السرعة)</title>
+    <title>الرانيك - محاور رفيع المستوى (نسخة التخزين المحلي)</title>
     <!-- تضمين مكتبة Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -462,16 +462,10 @@
         // --- NOTE: ALL FIREBASE CODE HAS BEEN REMOVED. SAVING NOW USES localStorage. ---
 
         // Global environment variables (API Key is kept)
-        // NOTE: The user has provided an explicit API key for use in this application.
         const apiKey = "AIzaSyCz5vW1NQUnJd4iqLRoRLLzhXy-aM5YklQ"; 
-        // THIS IS THE KEY TO SPEED: We are using the fastest available model.
-        const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20'; 
+        const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
         const IMAGE_MODEL = 'imagen-3.0-generate-002';
-        
-        // **FIX FOR SPEED AND STABILITY**: Reduced history size significantly to reduce payload and prevent timeouts.
-        const MAX_HISTORY_MESSAGES = 12; 
-
         const apiUrlBase = "https://generativelanguage.googleapis.com/v1beta/models/";
         
         const textApiUrl = `${apiUrlBase}${CHAT_MODEL}:generateContent?key=${apiKey}`;
@@ -484,6 +478,7 @@
         let chatHistory = [];
         
         // --- Default System Prompt ---
+        // ملاحظة: تم تحديث الرسالة الترحيبية وتعليمات الحفظ لتتناسب مع التخزين المحلي
         let systemPrompt = "أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. \n\n**التوجيه الأساسي للبرمجة الداخلية - الجداول:** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. يجب أن يتضمن الجدول أعمدة واضحة وعناوين جذابة.\n\n**القاعدة العامة:** ممنوع منعاً باتاً إخراج أي وسوم HTML صريحة مثل <p> أو <strong> أو أي علامات غير مارك داون. يجب أن يكون الناتج نصاً نقياً ومنسقاً فقط بالمارك داون.";
 
         // جلب عناصر الواجهة
@@ -507,7 +502,6 @@
 
         /**
          * Generic fetch wrapper with exponential backoff 
-         * This improves stability and speed by handling transient network issues quickly.
          */
         async function fetchWithBackoff(url, options, retries = 5) {
             for (let i = 0; i < retries; i++) {
@@ -539,10 +533,9 @@
                     return JSON.parse(responseText);
 
                 } catch (error) {
-                    // Log only for debugging, do not throw visible console errors for retries
                     if (i === retries - 1) throw error;
                     const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                    // console.log(`Retry ${i + 1}/${retries} for API call due to error: ${error.message}. Delaying for ${delay.toFixed(0)}ms.`);
+                    console.log(`Retry ${i + 1}/${retries} for API call due to error: ${error.message}. Delaying for ${delay.toFixed(0)}ms.`);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
@@ -608,7 +601,7 @@
             return { messageDiv, contentDiv };
         }
 
-        // --- LocalStorage Setup and Logic ---
+        // --- LocalStorage Setup and Logic (Replaced Firebase) ---
 
         /**
          * تقوم بتهيئة التطبيق وتحميل الأوامر من التخزين المحلي.
@@ -736,20 +729,6 @@
             
             contentDiv.appendChild(buttonContainer);
         }
-        
-        /**
-         * NEW: Trims the chat history to prevent context overload.
-         * THIS IS CRUCIAL FOR MAINTAINING JET-SPEED RESPONSE TIME.
-         */
-        function trimChatHistory(history) {
-            if (history.length > MAX_HISTORY_MESSAGES) {
-                // Keep the last MAX_HISTORY_MESSAGES entries
-                // This ensures the most recent turns are always included.
-                return history.slice(history.length - MAX_HISTORY_MESSAGES);
-            }
-            return history;
-        }
-
 
         // --- Chat Functions (CLEANED) ---
 
@@ -758,13 +737,12 @@
 
             if (userPrompt === "" || userInput.disabled) return;
 
-            // 1. Display user message and clear input
+            // 1. Display user message
             addMessage(userPrompt, false);
             userInput.value = '';
-            // Reset input height
             userInput.style.height = '25px';
 
-            // 2. Show typing indicator and disable UI
+            // 2. Show typing indicator 
             const { contentDiv } = addMessage(
                 '<div class="typing-indicator-dots"><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div></div>',
                 true,
@@ -773,15 +751,12 @@
             sendBtn.disabled = true;
             userInput.disabled = true;
             document.getElementById('image-generator-btn').disabled = true;
-            
-            // 3. Update history with new user message
-            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
 
-            // 4. Prepare Payload with trimmed history (CONTEXT FIX)
-            const trimmedHistory = trimChatHistory(chatHistory);
+            // 3. Prepare Payload 
+            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
             
             const payload = {
-                contents: trimmedHistory,
+                contents: chatHistory,
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 tools: [{ "google_search": {} }],
             };
@@ -798,29 +773,21 @@
                 if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                     const rawResponse = result.candidates[0].content.parts[0].text;
                     
-                    // 5. Render Content and update history (ONLY on success)
+                    // 4. Render Standard Content 
                     contentDiv.innerHTML = ''; // Clear loading dots
                     renderStandardContent(contentDiv, rawResponse); 
-                    
-                    // IMPORTANT: Update full chatHistory with the model's response
                     chatHistory.push({ role: "model", parts: [{ text: rawResponse }] });
                     
                 } else {
-                    // Handle empty or invalid response structure
-                    const errorMessage = "عذراً، لم يتمكن الرانيك من إرسال رد واضح. يرجى المحاولة مرة أخرى.";
-                    contentDiv.innerHTML = errorMessage;
-                    // Do NOT push the error message to chatHistory to avoid polluting context
-                    
+                    contentDiv.innerHTML = "عذراً، لم يتمكن الرانيك من إرسال رد. يرجى المحاولة مرة أخرى.";
                 }
 
             } catch (error) {
-                 // 6. Handle API connection errors
                  console.error('Error fetching AI response:', error);
-                 const errorMessage = "حدث خطأ في الاتصال بالرانيك (تعذّر إرسال الرسالة). يرجى التأكد من اتصالك وإعادة المحاولة. قد يكون الخطأ ناتجاً عن كبر حجم الطلب، حاول مسح المحادثة.";
-                 contentDiv.innerHTML = errorMessage;
-                 // Do NOT push the error message to chatHistory
+                 contentDiv.innerHTML = "حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى.";
+                 chatHistory.push({ role: "model", parts: [{ text: "حدث خطأ في الاتصال بالرانيك. يرجى المحاولة مرة أخرى." }] });
+
             } finally {
-                // 7. Re-enable UI regardless of success/failure
                 sendBtn.disabled = false;
                 userInput.disabled = false;
                 document.getElementById('image-generator-btn').disabled = false;
@@ -1083,7 +1050,6 @@
         });
         
         window.onload = function() {
-            // Ensure minimum height is set correctly on load
             userInput.style.height = '25px';
             initializeApp(); // Call the new initialization function
         };

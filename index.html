@@ -487,6 +487,7 @@
         // Initialize Markdown parser
         const md = window.markdownit({ html: true, linkify: true, typographer: true });
 
+        // نترك متغير سجل المحادثة (chatHistory) موجوداً لتتبع الرسائل في واجهة المستخدم ولدعم ميزة اقتراح طلب الصورة، لكننا لن نستخدمه في إرسال سياق المحادثة إلى النموذج.
         let chatHistory = [];
         
         // --- Default System Prompt (UPDATED with user's new rules) ---
@@ -861,11 +862,12 @@
             
             enableChatUI(false);
             
-            // 3. Prepare chat history (including the new user prompt)
+            // 3. Prepare chat history (keep for UI features like image prompt suggestion)
             chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
 
+            // 4. **تعديل جوهري:** إرسال الرسالة الحالية فقط لإلغاء ذاكرة (Context) المحادثة.
             const payload = {
-                contents: chatHistory,
+                contents: [{ role: "user", parts: [{ text: userPrompt }] }], 
                 // Add system instruction for persona and formatting rules
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
@@ -875,14 +877,14 @@
             };
 
             try {
-                // 4. Call the Gemini Text API
+                // 5. Call the Gemini Text API
                 const result = await fetchWithBackoff(textApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 
-                // 5. Check for explicit API error
+                // 6. Check for explicit API error
                 if (result.error) {
                     throw new Error(result.error.message || "خطأ API غير محدد.");
                 }
@@ -900,7 +902,7 @@
                     aiText = "عذراً، حدث خطأ غير متوقع أثناء المعالجة أو لم يتم العثور على محتوى مناسب. (الرد فارغ)";
                 }
 
-                // 6. Update chat history and display result
+                // 7. Update chat history for UI features (like image prompt suggestion) and display result
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 renderStandardContent(contentDiv, aiText);
 
@@ -910,7 +912,7 @@
                 contentDiv.innerHTML = `<p class="text-red-600 font-bold">${errorMessage}</p>`;
                 console.error("Chat API Error:", error);
             } finally {
-                // 7. Re-enable input and scroll
+                // 8. Re-enable input and scroll
                 enableChatUI(true);
                 messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
             }

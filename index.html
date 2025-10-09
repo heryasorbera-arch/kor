@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرانيك - محاور رفيع المستوى (نسخة التخزين المحلي)</title>
+    <title>الرانيك - محاور رفيع المستوى (نسخة عالية السرعة)</title>
     <!-- تضمين مكتبة Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -468,8 +468,9 @@
         const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20'; 
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
         const IMAGE_MODEL = 'imagen-3.0-generate-002';
-        // THIS ENSURES SPEED: Context trimming prevents large, slow payloads.
-        const MAX_HISTORY_MESSAGES = 20; 
+        
+        // **FIX FOR SPEED AND STABILITY**: Reduced history size significantly to reduce payload and prevent timeouts.
+        const MAX_HISTORY_MESSAGES = 12; 
 
         const apiUrlBase = "https://generativelanguage.googleapis.com/v1beta/models/";
         
@@ -760,6 +761,7 @@
             // 1. Display user message and clear input
             addMessage(userPrompt, false);
             userInput.value = '';
+            // Reset input height
             userInput.style.height = '25px';
 
             // 2. Show typing indicator and disable UI
@@ -814,7 +816,7 @@
             } catch (error) {
                  // 6. Handle API connection errors
                  console.error('Error fetching AI response:', error);
-                 const errorMessage = "حدث خطأ في الاتصال بالرانيك (تعذّر إرسال الرسالة). يرجى التأكد من اتصالك وإعادة المحاولة.";
+                 const errorMessage = "حدث خطأ في الاتصال بالرانيك (تعذّر إرسال الرسالة). يرجى التأكد من اتصالك وإعادة المحاولة. قد يكون الخطأ ناتجاً عن كبر حجم الطلب، حاول مسح المحادثة.";
                  contentDiv.innerHTML = errorMessage;
                  // Do NOT push the error message to chatHistory
             } finally {
@@ -1081,6 +1083,7 @@
         });
         
         window.onload = function() {
+            // Ensure minimum height is set correctly on load
             userInput.style.height = '25px';
             initializeApp(); // Call the new initialization function
         };

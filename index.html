@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرانيك - محاور رفيع المستوى</title>
+    <title>الرانيك - محاور رفيع المستوى (نسخة التخزين المحلي)</title>
     <!-- تضمين مكتبة Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -394,12 +394,12 @@
 
             <!-- محتوى تخصيص الأوامر: صندوق النص الكبير -->
             <div class="space-y-4">
-                <p class="text-gray-600">هنا يمكنك تعديل الأوامر الأساسية للرانيك، لتغيير شخصيته وأسلوبه. (يتم تحميل الأوامر المحفوظة من السحابة).</p>
+                <p class="text-gray-600">هنا يمكنك تعديل الأوامر الأساسية للرانيك، لتغيير شخصيته وأسلوبه. (يتم حفظ الأوامر في التخزين المحلي للمتصفح).</p>
 
                 <textarea id="system-prompt-textarea" rows="10"
                     class="w-full p-4 border border-gray-300 rounded-lg shadow-inner focus:border-indigo-500 focus:ring-indigo-500 text-sm resize-vertical"
                     style="direction: rtl; text-align: right;"></textarea>
-                <p class="text-sm text-gray-500 mt-2 text-right">معرف المستخدم الحالي: <span id="modal-user-id" class="font-mono text-xs text-indigo-500">جاري التحميل...</span></p>
+                <p class="text-sm text-gray-500 mt-2 text-right">آلية الحفظ: <span id="modal-user-id" class="font-mono text-xs text-indigo-500">التخزين المحلي للمتصفح</span></p>
             </div>
 
             <div class="mt-8 flex justify-end gap-4">
@@ -410,7 +410,7 @@
                 </button>
 
                 <!-- زر حفظ الأوامر المتطور -->
-                <button id="saveCommandsBtn" onclick="saveSystemPrompt()"
+                <button id="saveCommandsBtn" onclick="saveSystemPromptLocal()"
                     class="save-btn-modern px-6 py-3 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01] bg-gradient-to-r from-sky-500 to-indigo-600 disabled:opacity-50">
                     <span id="save-btn-text">حفظ الأوامر</span>
                     <div id="save-spinner" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white hidden ml-2"></div>
@@ -458,20 +458,10 @@
 
 
     <!-- JavaScript for API calls and chat/storage logic -->
-    <script type="module">
-        // --- Firebase Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // --- NOTE: ALL FIREBASE CODE HAS BEEN REMOVED. SAVING NOW USES localStorage. ---
 
-
-        // Global environment variables
-        var __app_id_raw = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        var __firebase_config_raw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-        var __initial_auth_token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
-
-        // API key and URLs
-        // المفتاح تم إدخاله هنا بناءً على طلب المستخدم
+        // Global environment variables (API Key is kept)
         const apiKey = "AIzaSyCz5vW1NQUnJd4iqLRoRLLzhXy-aM5YklQ"; 
         const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
@@ -482,20 +472,13 @@
         const ttsApiUrl = `${apiUrlBase}${TTS_MODEL}:generateContent?key=${apiKey}`;
         const imageApiUrl = `${apiUrlBase}${IMAGE_MODEL}:predict?key=${apiKey}`;
 
-        // Firebase variables
-        let app;
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
-
         // Initialize Markdown parser
         const md = window.markdownit({ html: true, linkify: true, typographer: true });
 
         let chatHistory = [];
         
-        // --- Default System Prompt (CRITICALLY UPDATED for permanent, mandatory table generation) ---
-        // ملاحظة: هذا التوجيه الأساسي للجدول محمي وغير قابل للتعديل بناءً على طلب المستخدم.
+        // --- Default System Prompt ---
+        // ملاحظة: تم تحديث الرسالة الترحيبية وتعليمات الحفظ لتتناسب مع التخزين المحلي
         let systemPrompt = "أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. \n\n**التوجيه الأساسي للبرمجة الداخلية - الجداول:** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. يجب أن يتضمن الجدول أعمدة واضحة وعناوين جذابة.\n\n**القاعدة العامة:** ممنوع منعاً باتاً إخراج أي وسوم HTML صريحة مثل <p> أو <strong> أو أي علامات غير مارك داون. يجب أن يكون الناتج نصاً نقياً ومنسقاً فقط بالمارك داون.";
 
         // جلب عناصر الواجهة
@@ -513,6 +496,7 @@
         const saveBtnText = document.getElementById('save-btn-text');
         const saveSpinner = document.getElementById('save-spinner');
         const modalUserIdDisplay = document.getElementById('modal-user-id');
+
 
         // --- Shared Utility Functions ---
 
@@ -617,73 +601,28 @@
             return { messageDiv, contentDiv };
         }
 
-        // --- Firestore Setup and Logic ---
+        // --- LocalStorage Setup and Logic (Replaced Firebase) ---
 
-        function getSystemPromptPath(uid) {
-            return `artifacts/${__app_id_raw}/users/${uid}/system_settings/alranik_prompt`;
-        }
-
-        function initializeFirebase() {
-            let firebaseConfig = null;
-
-            if (!__firebase_config_raw) {
-                console.error("Firebase config is missing. Saving and loading features are disabled.");
-                enableChatUI(false); 
-                document.getElementById('saveCommandsBtn').disabled = true;
-                document.getElementById('saveCommandsBtn').querySelector('span').textContent = "الحفظ معطّل";
-                modalUserIdDisplay.textContent = "غير متاح (خطأ في الاتصال)";
-                return;
-            }
-
-            try {
-                firebaseConfig = JSON.parse(__firebase_config_raw);
-                if (Object.keys(firebaseConfig).length === 0) {
-                     throw new Error("Parsed config is empty.");
-                }
-
-                setLogLevel('debug');
-                
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        isAuthReady = true;
-                        modalUserIdDisplay.textContent = userId;
-                        await loadSystemPrompt();
-                        enableChatUI(true, true); 
-                    } else {
-                        if (__initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("خطأ في تهيئة Firebase:", error);
-                enableChatUI(true, false); 
-                document.getElementById('saveCommandsBtn').disabled = true;
-                document.getElementById('saveCommandsBtn').querySelector('span').textContent = "الحفظ معطّل";
-                modalUserIdDisplay.textContent = "خطأ في الاتصال";
-            }
+        /**
+         * تقوم بتهيئة التطبيق وتحميل الأوامر من التخزين المحلي.
+         */
+        function initializeApp() {
+            loadSystemPromptLocal();
+            enableChatUI(true); 
         }
         
-        function enableChatUI(isChatActive, isFirebaseActive) {
+        /**
+         * تم تبسيطها لتمكين واجهة المستخدم فقط.
+         */
+        function enableChatUI(isChatActive) {
             userInput.disabled = !isChatActive;
             sendBtn.disabled = !isChatActive;
             document.getElementById('image-generator-btn').disabled = !isChatActive;
             
             const welcomeMessageEl = messagesDisplay.querySelector('.message.ai-message .message-content p');
             if(welcomeMessageEl && welcomeMessageEl.textContent.includes('جاري تهيئة')) {
-                const firebaseStatusNote = isFirebaseActive ? 
-                    'لقد تم تحميل أوامرك المخصصة بنجاح. يمكنك الآن حفظ وتعديل إعدادات الرانيك الخاصة بك.' :
-                    'تنبيه: خاصية حفظ الأوامر وإعدادات المستخدم غير متاحة حالياً بسبب خطأ في إعدادات الاتصال.';
+                const firebaseStatusNote = 'لقد تم تحميل أوامرك المخصصة **محلياً** في متصفحك. يمكنك الآن حفظ وتعديل إعدادات الرانيك الخاصة بك.';
 
-                 // Use the existing contentDiv (parent element of welcomeMessageEl)
                  const contentDiv = welcomeMessageEl.parentElement;
                  
                  const welcomeText = `
@@ -691,27 +630,20 @@
                     <p><strong>${firebaseStatusNote}</strong></p>
                  `;
 
-                 // Use the renderStandardContent logic to finalize the initial message
                  renderStandardContent(contentDiv, welcomeText);
             }
         }
 
-        async function loadSystemPrompt() {
-            if (!db || !userId) return;
+        /**
+         * تحميل الأوامر من التخزين المحلي
+         */
+        function loadSystemPromptLocal() {
+            // المفتاح المستخدم للتخزين المحلي
+            const savedPrompt = localStorage.getItem('alranik_system_prompt');
 
-            try {
-                const promptDocRef = doc(db, getSystemPromptPath(userId));
-                const docSnap = await getDoc(promptDocRef);
-
-                if (docSnap.exists()) {
-                    const savedPrompt = docSnap.data().prompt;
-                    if (savedPrompt && typeof savedPrompt === 'string') {
-                        // Load saved prompt, but the fixed table instruction is already hardcoded in the default
-                        systemPrompt = savedPrompt;
-                    }
-                } 
-            } catch (error) {
-                console.error("Error loading system prompt:", error);
+            if (savedPrompt) {
+                // استخدام القيمة المحفوظة إذا وجدت
+                systemPrompt = savedPrompt;
             }
         }
 
@@ -729,12 +661,10 @@
             modal.classList.remove('flex');
         }
 
-        async function saveSystemPrompt() {
-            if (!isAuthReady || !userId || !db) {
-                showNotification("خطأ: نظام الحفظ غير جاهز أو معطّل.", 'error');
-                return;
-            }
-
+        /**
+         * حفظ الأوامر في التخزين المحلي
+         */
+        function saveSystemPromptLocal() {
             const newPrompt = systemPromptTextarea.value.trim();
             
             if (!newPrompt) {
@@ -747,22 +677,17 @@
             saveSpinner.classList.remove('hidden');
 
             try {
-                const promptDocRef = doc(db, getSystemPromptPath(userId));
-                
-                await setDoc(promptDocRef, {
-                    prompt: newPrompt,
-                    lastUpdated: serverTimestamp(),
-                    userId: userId
-                });
+                // حفظ الأوامر في localStorage
+                localStorage.setItem('alranik_system_prompt', newPrompt);
 
                 systemPrompt = newPrompt; 
-                showNotification("تم حفظ الأوامر المخصصة بنجاح!");
+                showNotification("تم حفظ الأوامر المخصصة محلياً بنجاح!");
                 
                 closeModal();
             
             } catch (error) {
-                console.error("خطأ في حفظ الأمر:", error);
-                showNotification(`خطأ: فشل الحفظ. ${error.message}`, 'error');
+                console.error("Error saving system prompt locally:", error);
+                showNotification(`خطأ: فشل الحفظ المحلي. ${error.message}`, 'error');
             } finally {
                 saveCommandsBtn.disabled = false;
                 saveBtnText.textContent = 'حفظ الأوامر';
@@ -770,19 +695,15 @@
             }
         }
 
-        // --- Core Content Rendering Logic (CRITICALLY UPDATED for Sanitization) ---
+        // --- Core Content Rendering Logic ---
         
         /**
          * دالة لتنقية الناتج من أي وسوم HTML أو فراغات غير مرغوبة قبل عرضها.
-         * هذا يضمن إزالة أي <p> أو <strong> قد يولدها النموذج خطأً.
          */
         function sanitizeOutput(rawText) {
             let cleanText = rawText.trim();
-            // 1. Remove leading/trailing <p> and </p> tags
             cleanText = cleanText.replace(/^(<p>|<\/p>|<p><strong>|<strong>)/i, '').replace(/(<\/p>|<strong><\/p>|<strong>|<\/strong>)$/i, '');
-            // 2. Replace any remaining <strong> with ** (optional, markdownit should handle it)
             cleanText = cleanText.replace(/<strong>/gi, '**').replace(/<\/strong>/gi, '**');
-            // 3. Remove leading/trailing quotes sometimes added by the model
             cleanText = cleanText.replace(/^"|"$/g, '').trim();
 
             return cleanText;
@@ -790,14 +711,10 @@
 
         /**
          * Applies Markdown formatting and adds the TTS button to a contentDiv.
-         * @param {HTMLElement} contentDiv - The target element.
-         * @param {string} rawText - The text content to render.
          */
         function renderStandardContent(contentDiv, rawText) {
-            // Apply the sanitization BEFORE rendering Markdown
             const sanitizedText = sanitizeOutput(rawText);
             
-            // Markdown-it handles the pure Markdown tables correctly.
             const processedContent = md.render(sanitizedText);
             contentDiv.innerHTML = processedContent;
 
@@ -835,7 +752,7 @@
             userInput.disabled = true;
             document.getElementById('image-generator-btn').disabled = true;
 
-            // 3. Prepare Payload (Standard Chat mode only)
+            // 3. Prepare Payload 
             chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
             
             const payload = {
@@ -856,7 +773,7 @@
                 if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                     const rawResponse = result.candidates[0].content.parts[0].text;
                     
-                    // 4. Render Standard Content (Sanitization applied inside renderStandardContent)
+                    // 4. Render Standard Content 
                     contentDiv.innerHTML = ''; // Clear loading dots
                     renderStandardContent(contentDiv, rawResponse); 
                     chatHistory.push({ role: "model", parts: [{ text: rawResponse }] });
@@ -947,12 +864,10 @@
             const messageContentElement = button.closest('.message-content');
             
             const tempClone = messageContentElement.cloneNode(true);
-            // Remove feature buttons from clone for clean text
             tempClone.querySelector('.ai-feature-buttons')?.remove();
 
             let messageContent = tempClone.textContent.trim();
             
-            // Remove any markdown special characters for cleaner TTS
             messageContent = messageContent.replace(/\*\*|__|#|`/g, '');
             messageContent = messageContent.substring(0, 1000); 
 
@@ -1024,7 +939,6 @@
         }
         
         function promptForImage() {
-            // Populate with the last user prompt if available
             const lastUserPrompt = chatHistory.slice().reverse().find(msg => msg.role === 'user')?.parts[0]?.text || '';
             imagePromptInputEl.value = lastUserPrompt;
 
@@ -1061,7 +975,6 @@
                         <div class="ai-image-container">
                             <img src="${imageUrl}" alt="${prompt}">
                         </div>`;
-                    // Use renderStandardContent here for consistency (though it doesn't hurt much)
                     const { contentDiv } = addMessage('', true);
                     contentDiv.innerHTML = imageHtml;
                 } else {
@@ -1138,15 +1051,16 @@
         
         window.onload = function() {
             userInput.style.height = '25px';
-            initializeFirebase();
+            initializeApp(); // Call the new initialization function
         };
         
+        // Exporting functions globally
         window.textToSpeech = textToSpeech; 
         window.promptForImage = promptForImage;
         window.handleImageGeneration = handleImageGeneration;
         window.openModal = openModal;
         window.closeModal = closeModal;
-        window.saveSystemPrompt = saveSystemPrompt;
+        window.saveSystemPromptLocal = saveSystemPromptLocal; // Updated name
         window.hideImageModal = hideImageModal;
 
     </script>

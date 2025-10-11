@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرانيك - محاور رفيع المستوى (نسخة التخزين المحلي)</title>
+    <title>الرانيك - محاور رفيع المستوى (نسخة نصية)</title>
     <!-- تضمين مكتبة Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Lucide Icons for the circular button -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Markdown-it library for parsing Markdown to HTML -->
     <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote/dist/markdown-it-footnote.min.js"></script>
@@ -67,8 +65,8 @@
         /* --- Scrolling and Messages Display (FIXED) --- */
         .messages-display {
             flex-grow: 1;
-            overflow-y: auto; 
-            padding-bottom: 140px; /* مساحة كافية لتجنب تداخل شريط الإدخال الثابت */
+            /* تم تقليل المسافة الاحتياطية بعد إزالة زر الصورة العائم */
+            padding-bottom: 120px; 
         }
         
         /* Message Bubble Styling */
@@ -142,7 +140,6 @@
 
         /* --- Custom Markdown Table Styling (Protected Logic) --- */
         .message-content table {
-            /* Ensure table container can scroll horizontally if needed for very wide content, but prefer wrapping */
             width: 100%; 
             border-collapse: collapse;
             margin-top: 15px;
@@ -152,7 +149,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .message-content th {
-            background-color: var(--accent-color); /* Header background */
+            background-color: var(--accent-color); 
             color: #FFFFFF;
             padding: 12px 15px;
             text-align: right;
@@ -164,14 +161,13 @@
             border: 1px solid #F3F4F6;
             text-align: right;
             font-size: 0.95rem;
-            /* Allow text to wrap within table cells */
             word-break: break-word; 
         }
         .message-content tbody tr:nth-child(even) {
             background-color: #FAFAFA;
         }
         .message-content tbody tr:hover {
-            background-color: #E6F0FF; /* Soft blue hover */
+            background-color: #E6F0FF; 
         }
 
 
@@ -185,7 +181,7 @@
             height: 10px;
             background-color: var(--text-color);
             border-radius: 50%;
-            margin-left: 5px; /* Adjust margin for RTL */
+            margin-left: 5px; 
             display: inline-block;
             animation: blink 1.4s infinite both;
         }
@@ -198,7 +194,7 @@
             padding-top: 10px;
         }
         .typing-indicator-wrapper {
-            min-height: 50px; /* Ensure space for the indicator */
+            min-height: 50px; 
         }
         
         /* Input Area - Floating and Central */
@@ -258,34 +254,6 @@
         }
 
 
-        /* Floating Image Generation Button (Sphere Button) */
-        #image-generator-btn {
-            position: fixed;
-            bottom: 120px; 
-            right: 20px; 
-            z-index: 90;
-            width: 55px;
-            height: 55px;
-            background-color: #6B7280; 
-            color: #FFFFFF;
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, background-color 0.2s;
-        }
-        #image-generator-btn:hover:not(:disabled) {
-            background-color: #4B5563;
-            transform: scale(1.1);
-        }
-        #image-generator-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         /* AI Name Label */
         .ai-name-label {
             max-width: 800px;
@@ -298,10 +266,7 @@
 
         /* Responsive Adjustments */
         @media (max-width: 600px) {
-            #image-generator-btn {
-                bottom: 100px; 
-                right: 10px;
-            }
+            /* لا يوجد زر عائم بعد الآن */
         }
         
         /* Modal Overlay Style */
@@ -322,15 +287,6 @@
             opacity: 1;
         }
         
-        /* Image container styles */
-        .ai-image-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
     </style>
 </head>
 <body onload="initializeApp()">
@@ -363,16 +319,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Floating Image Generation Button (Sphere Button) -->
-            <button
-                id="image-generator-btn"
-                onclick="promptForImage()"
-                title="توليد صورة إبداعية"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);"><path d="m3 9 1.8 6M21 9l-1.8 6M10 20l2 2 2-2M15 2h2a2 2 0 0 1 2 2v2M5 2h2a2 2 0 0 0-2 2v2M4 12v3a6 6 0 0 0 12 0v-3M12 2v2"/></svg>
-            </button>
-
 
             <div class="input-area-wrapper">
                 <div class="input-area">
@@ -415,7 +361,7 @@
             </div>
 
             <div class="mt-8 flex justify-end gap-4">
-                <!-- زر الإغلاق المطوَّر -->
+                <!-- زر الإغلاق المطوَّر -->
                 <button id="closeModalBtn" onclick="closeModal()"
                     class="close-btn-modern px-6 py-3 bg-red-500 text-white font-semibold rounded-xl shadow-lg hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75">
                     إلغاء/إغلاق
@@ -431,37 +377,6 @@
         </div>
     </div>
 
-    <!-- Modal for Image Generation is retained -->
-    <div id="image-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg transition-all transform scale-100 opacity-100">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">توليد صورة إبداعية بواسطة هرياسور</h2>
-            <p class="text-sm text-gray-600 mb-4">صف المشهد الذي ترغب في أن يقوم الرانيك برسمه بدقة عالية.</p>
-            <textarea
-                id="image-prompt-input"
-                class="w-full resize-none border border-gray-300 rounded-lg p-3 mb-4 focus:ring-indigo-500 focus:border-indigo-500"
-                rows="4"
-                placeholder="مثال: فارس عربي يمتطي حصاناً أبيض في صحراء واسعة تحت سماء مليئة بالنجوم، بأسلوب فن رقمي مفصل."
-                style="direction: rtl; text-align: right;"
-            ></textarea>
-            <div id="image-error-message" class="text-red-500 text-sm mb-4 hidden"></div>
-            <div class="flex justify-end space-x-3 space-x-reverse">
-                <button
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors"
-                    onclick="hideImageModal()"
-                >
-                    إلغاء
-                </button>
-                <button
-                    id="generate-image-btn-modal"
-                    class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
-                    onclick="handleImageGeneration()"
-                >
-                    توليد الصورة
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
@@ -471,29 +386,33 @@
 
     <!-- JavaScript for API calls and chat/storage logic -->
     <script>
-        // --- NOTE: ALL FIREBASE CODE HAS BEEN REMOVED. SAVING NOW USES localStorage. ---
-
         // Global environment variables (API Key is set to empty string for runtime injection)
         const apiKey = "AIzaSyCz5vW1NQUnJd4iqLRoRLLzhXy-aM5YklQ"; 
         const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
-        const IMAGE_MODEL = 'imagen-3.0-generate-002';
-        const apiUrlBase = "https://generativelanguage.googleapis.com/v1beta/models/";
         
-        const textApiUrl = `${apiUrlBase}${CHAT_MODEL}:generateContent?key=${apiKey}`;
-        const ttsApiUrl = `${apiUrlBase}${TTS_MODEL}:generateContent?key=${apiKey}`;
-        const imageApiUrl = `${apiUrlBase}${IMAGE_MODEL}:predict?key=${apiKey}`;
+        const textApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CHAT_MODEL}:generateContent?key=${apiKey}`;
+        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`;
 
         // Initialize Markdown parser
         const md = window.markdownit({ html: true, linkify: true, typographer: true });
 
-        // نترك متغير سجل المحادثة (chatHistory) موجوداً لتتبع الرسائل في واجهة المستخدم ولدعم ميزة اقتراح طلب الصورة، لكننا لن نستخدمه في إرسال سياق المحادثة إلى النموذج.
+        // سجل المحادثة: سيتم الآن إرساله بالكامل في كل طلب لضمان استمرارية السياق
         let chatHistory = [];
         
-        // --- Default System Prompt (UPDATED with user's new rules) ---
-        let systemPrompt = `أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم.
+        // --- Default System Prompt (Updated with strict consistency rules) ---
+        let systemPrompt = `أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. **ملحوظة صارمة:** يجب أن تكون جميع ردودك حصراً **باللغة العربية الفصحى** والأسلوب الأدبي الرفيع.
 
-**التوجيه الأساسي للبرمجة الداخلية - الجداول:** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. ملاحظة هامة: يجب أن تكون أسطر الفصل الأفقية للجدول قصيرة وثابتة (مثل |:---|) لتجنب ظهور شريط تمرير أفقي طويل وغير مرغوب فيه. يجب أن يكون الجدول هو الجزء الأهم والأول من الرد، و لا يجوز فصله بأي نص إضافي قبل بدايته.
+**قواعد الاتساق والسياق (للرواية المستمرة):**
+1.  **الذاكرة الكاملة:** يجب عليك تذكر كل التفاصيل، الأسماء، الأماكن، والقواعد التي وضعها المستخدم في الأجزاء السابقة من المحادثة (التي يتم إرسالها إليك الآن في سجل المحتوى).
+2.  **ممنوع الاختراع:** ممنوع منعاً باتاً اختراع أي أسماء دول، شخصيات، أو أحداث تتعارض مع ما تم ذكره سابقاً في سياق المحادثة. يجب عليك الالتزام بالواقع أو بالواقع الذي تم بناؤه في الرواية.
+3.  **الثبات على الرواية:** إذا كنت في وضع رواية أو بناء قصة، يجب أن تظل ثابتاً على هذا الدور وألا تخرج عنه إلا بطلب صريح من المستخدم.
+
+**التوجيه الأساسي للبرمجة الداخلية - الجداول (تعليمات صارمة ضد التقطع):** عند طلب أي محتوى يتطلب تنظيماً (مثل المقارنة، التصنيف، أو الإعلان عن النتائج المالية كالأرباح والخسائر)، يجب عليك **وجوباً** عرض هذا المحتوى في شكل **جدول منظم ومتقدم للغاية** باستخدام **تنسيق المارك داون النقي (باستخدام | و - فقط)**. 
+
+**قاعدة القصاصة الصارمة (Truncation Prevention):** لا يجوز أن يتجاوز النص في أي خلية جدول مفردة **70 حرفاً بأي حال من الأحوال**. يجب عليك اختصار النقاط للحفاظ على تنسيق الجدول سليماً وتجنب القص. يجب أن تكون أسطر الفصل الأفقية للجدول قصيرة وثابتة على النمط التالي: | ----- | ----- | ----- |. 
+
+**الأولوية:** يجب أن يكون الجدول هو الجزء الأهم والأول من الرد، و لا يجوز فصله بأي نص إضافي قبل بدايته.
 
 **التخصص العسكري والمالي:** في حالة المقارنات العسكرية-المالية، يجب أن يقتصر محتوى الجدول حصرياً على: **أسماء المعدات**، و**العدد الإجمالي** لكل معدة، و**الجيش الفعلي (Active Personnel)**، و**الجيش الاحتياطي (Reserve Personnel)**.
 
@@ -507,9 +426,6 @@
         // جلب عناصر الواجهة
         const modal = document.getElementById('customizationModal');
         const systemPromptTextarea = document.getElementById('system-prompt-textarea');
-        const imageModalEl = document.getElementById('image-modal');
-        const imagePromptInputEl = document.getElementById('image-prompt-input');
-        const imageErrorMessageEl = document.getElementById('image-error-message');
         const loadingOverlayEl = document.getElementById('loading-overlay');
         const messagesDisplay = document.getElementById('messages-display');
         const sendBtn = document.getElementById('send-btn');
@@ -563,11 +479,6 @@
                         return {};
                     }
 
-                    // For image generation API, the payload is sometimes nested differently
-                    if (url.includes(IMAGE_MODEL)) {
-                         return JSON.parse(responseText);
-                    }
-                    
                     return JSON.parse(responseText);
 
                 } catch (error) {
@@ -585,8 +496,8 @@
         function showNotification(message, type = 'success') {
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
             const iconHtml = type === 'success' 
-                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucude-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>'
-                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-octagon"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/></svg>';
+                ? '<i class="fas fa-check-circle text-xl"></i>'
+                : '<i class="fas fa-exclamation-triangle text-xl"></i>';
 
             notificationElement.className = `fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-md text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 space-x-reverse ${bgColor}`;
             notificationElement.innerHTML = `${iconHtml}<span id="notification-message" class="text-lg font-semibold">${message}</span>`;
@@ -655,8 +566,8 @@
         function enableChatUI(isChatActive) {
             userInput.disabled = !isChatActive;
             sendBtn.disabled = !isChatActive;
-            document.getElementById('image-generator-btn').disabled = !isChatActive;
-            
+            // تمت إزالة زر توليد الصورة
+
             // Auto-adjust textarea height on input
             userInput.addEventListener('input', function() {
                 this.style.height = 'auto';
@@ -673,15 +584,15 @@
 
             const welcomeMessageEl = messagesDisplay.querySelector('.message.ai-message .message-content p');
             if(welcomeMessageEl && welcomeMessageEl.textContent.includes('جاري تهيئة')) {
-                const firebaseStatusNote = 'لقد تم تحميل أوامرك المخصصة **محلياً** في متصفحك. يمكنك الآن حفظ وتعديل إعدادات الرانيك الخاصة بك.';
+                const storageNote = 'لقد تم تحميل أوامرك المخصصة **محلياً** في متصفحك، مما يمنحك تحكماً كاملاً في شخصية الرانيك.';
 
                 const contentDiv = welcomeMessageEl.parentElement;
                 
-                // تم تحديث هذه الرسالة لتعكس التعديل على الجداول والتخصص الجديد
+                // تم تحديث هذه الرسالة
                 const welcomeText = `
-                    <p>أهلاً بك! أنا **الرانيك**، محاور رفيع المستوى ومحلل استراتيجي للحرب. أسلوبي متطور جداً ولن أخرج عن مساري مطلقاً.</p>
-                    <p>أصبحت الآن مبرمجاً على توليد **جداول متطورة ومنظمة** (خاصة المقارنات العسكرية-المالية) وتقديم **تحليلات حربية ذكية وواقعية** بصيغة '**عملية [اسم رمزي]**'.</p>
-                    <p><strong>${firebaseStatusNote}</strong></p>
+                    <p>أهلاً بك أيها المستكشف الرفيع! أنا **الرانيك**.</p>
+                    <p>ألتزم حصراً **باللغة العربية الفصحى** في جميع ردودي، وجاهز لتقديم **الجداول المتطورة والتحليلات الاستراتيجية** وفقاً لأوامرك.</p>
+                    <p><strong>${storageNote}</strong></p>
                 `;
 
                 renderStandardContent(contentDiv, welcomeText);
@@ -829,7 +740,7 @@
 
             // data sub-chunk
             view.setUint32(offset, 0x64617461, false); offset += 4; // "data"
-            view.setUint32(offset, dataLength, true); offset += 4; // Subchunk2Size
+            view.setUint32(offset, dataLength, false); offset += 4; // Subchunk2Size (NOTE: Changed to false (little-endian is standard))
 
             // Write PCM data
             for (let i = 0; i < pcm16.length; i++) {
@@ -841,7 +752,7 @@
         }
 
 
-        // --- Core Chat Functions ---
+        // --- Core Chat Functions (UPDATED FOR FULL CONTEXT) ---
 
         async function sendMessage() {
             const userPrompt = userInput.value.trim();
@@ -862,12 +773,15 @@
             
             enableChatUI(false);
             
-            // 3. Prepare chat history (keep for UI features like image prompt suggestion)
+            // 3. Prepare chat history and add the latest user message
+            // يتم إضافة الرسالة الأخيرة إلى السجل قبل الإرسال
             chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
 
-            // 4. **تعديل جوهري:** إرسال الرسالة الحالية فقط لإلغاء ذاكرة (Context) المحادثة.
+            // 4. إرسال سجل المحادثة بالكامل (Full Context) لضمان الذاكرة الكاملة
             const payload = {
-                contents: [{ role: "user", parts: [{ text: userPrompt }] }], 
+                // ** التحديث الحاسم: إرسال سجل المحادثة الكاملة لضمان السياق المستمر **
+                contents: chatHistory, 
+                
                 // Add system instruction for persona and formatting rules
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
@@ -896,13 +810,13 @@
                     aiText = candidate.content.parts[0].text;
                 } else if (candidate?.safetyRatings) {
                     // **الرد المحظور أمنياً**
-                    aiText = "عذراً، تم حظر هذا الرد بواسطة فلاتر الأمان. يرجى تعديل استفسارك ليكون أكثر ملائمة.";
+                    aiText = "عذراً، تم حظر هذا الرد بواسطة فلاتر الأمان. يرجى تعديل استفسارك ليكون أكثر ملاءمة.";
                 } else {
                     // **الرد الفارغ أو غير المتوقع**
                     aiText = "عذراً، حدث خطأ غير متوقع أثناء المعالجة أو لم يتم العثور على محتوى مناسب. (الرد فارغ)";
                 }
 
-                // 7. Update chat history for UI features (like image prompt suggestion) and display result
+                // 7. Update chat history and display result
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 renderStandardContent(contentDiv, aiText);
 
@@ -1003,86 +917,6 @@
                 }
             }
         }
-
-
-        // --- Image Generation Functions ---
-
-        function promptForImage() {
-            imagePromptInputEl.value = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1].parts[0].text : '';
-            imageErrorMessageEl.classList.add('hidden');
-            imageModalEl.classList.remove('hidden');
-        }
-
-        function hideImageModal() {
-            imageModalEl.classList.add('hidden');
-        }
-
-        async function handleImageGeneration() {
-            const imagePrompt = imagePromptInputEl.value.trim();
-            if (imagePrompt.length < 10) {
-                imageErrorMessageEl.textContent = "يجب أن يكون الوصف أطول وأكثر تفصيلاً (على الأقل 10 أحرف).";
-                imageErrorMessageEl.classList.remove('hidden');
-                return;
-            }
-            
-            // Hide Modal, show Loading, Disable UI
-            hideImageModal();
-            showLoading('جاري توليد الصورة الفنية...');
-            enableChatUI(false);
-            
-            // 1. Display user image prompt in chat
-            const userImagePrompt = `**[طلب توليد صورة]:** ${imagePrompt}`;
-            addMessage(userImagePrompt, false);
-
-            // 2. Prepare the payload for Imagen 3.0
-            const payload = {
-                instances: [{
-                    prompt: imagePrompt
-                }],
-                parameters: {
-                    "sampleCount": 1 // Request only one image
-                }
-            };
-            
-            try {
-                // 3. Call the Image API (using :predict endpoint)
-                const result = await fetchWithBackoff(imageApiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
-
-                if (!base64Data) {
-                    throw new Error("فشل في الحصول على بيانات الصورة المشفرة.");
-                }
-
-                const imageUrl = `data:image/png;base64,${base64Data}`;
-
-                // 4. Display the generated image in the chat
-                const imageHtml = `
-                    <p>إليك النتيجة الفنية لطلبك:</p>
-                    <div class="ai-image-container">
-                        <img src="${imageUrl}" alt="${imagePrompt}">
-                    </div>
-                `;
-                addMessage(imageHtml, true);
-
-
-            } catch (error) {
-                const errorMessage = `خطأ في توليد الصورة: ${error.message}.`;
-                addMessage(`<p class="text-red-600 font-bold">${errorMessage}</p>`, true);
-                console.error("Image API Error:", error);
-            } finally {
-                // 5. Re-enable input and hide loading
-                hideLoading();
-                enableChatUI(true);
-                messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
-            }
-        }
-
-
     </script>
 </body>
 </html>

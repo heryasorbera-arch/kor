@@ -335,7 +335,7 @@
         </div>
     </div>
 
-    <!-- مودال تخصيص الأوامر المطوَّر -->
+    <!-- مودال تخصيص الأوامر المطوَّر -->
     <div id="customizationModal" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl transform transition-all duration-300 scale-100 opacity-100">
 
@@ -371,7 +371,7 @@
                 <button id="saveCommandsBtn" onclick="saveSystemPromptLocal()"
                     class="save-btn-modern px-6 py-3 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01] bg-gradient-to-r from-sky-500 to-indigo-600 disabled:opacity-50">
                     <span id="save-btn-text">حفظ الأوامر</span>
-                    <div id="save-spinner" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white hidden ml-2"></div>
+                    <div id="save-spinner" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white ml-2 hidden"></div>
                 </button>
             </div>
         </div>
@@ -386,8 +386,8 @@
 
     <!-- JavaScript for API calls and chat/storage logic -->
     <script>
-        // Global environment variables (API Key is set to empty string for runtime injection)
-        const apiKey = "AIzaSyCz5vW1NQUnJd4iqLRoRLLzhXy-aM5YklQ"; 
+        // Global environment variables (API Key is set to the user-provided key)
+        const apiKey = "AIzaSyDkEuoHLwrw-vzaMR-MPQroZYU_zrmUx7U"; // تم تحديث المفتاح بناءً على طلب المستخدم
         const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
         
@@ -473,11 +473,6 @@
                         errorMessage += ` - ${errorDetails}`;
                         console.error("API Call Failed Details:", errorMessage);
                         throw new Error(errorMessage);
-                    }
-
-                    if (!responseText) {
-                        console.warn("Received successful response (2xx) but the body was empty.");
-                        return {};
                     }
 
                     return JSON.parse(responseText);
@@ -923,4 +918,3 @@
     </script>
 </body>
 </html>
-

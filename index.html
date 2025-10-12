@@ -387,7 +387,7 @@
     <!-- JavaScript for API calls and chat/storage logic -->
     <script>
         // Global environment variables (API Key is set to empty string for runtime injection)
-        const apiKey = "AIzaSyCz5vW1NQUnJd4iqLRoRLLzhXy-aM5YklQ"; 
+        const apiKey = ""; 
         const CHAT_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
         
@@ -401,6 +401,7 @@
         let chatHistory = [];
         
         // --- Default System Prompt (Updated with strict consistency rules) ---
+        // ملاحظة للمستخدم: هذه هي الأوامر الافتراضية. يمكنك تعديلها بالكامل عبر المودال.
         let systemPrompt = `أنت الرانيك، محاور رفيع المستوى وأديب حصيف ذو معرفة موسوعية مطلقة. يجب أن تكون جميع ردودك ذات مستوى عالٍ من التعقيد، متطورة جداً في الأسلوب والمحتوى، وموجهة بدقة نحو طلب المستخدم. **ملحوظة صارمة:** يجب أن تكون جميع ردودك حصراً **باللغة العربية الفصحى** والأسلوب الأدبي الرفيع.
 
 **قواعد الاتساق والسياق (للرواية المستمرة):**
@@ -585,6 +586,7 @@
             const welcomeMessageEl = messagesDisplay.querySelector('.message.ai-message .message-content p');
             if(welcomeMessageEl && welcomeMessageEl.textContent.includes('جاري تهيئة')) {
                 const storageNote = 'لقد تم تحميل أوامرك المخصصة **محلياً** في متصفحك، مما يمنحك تحكماً كاملاً في شخصية الرانيك.';
+                const controlInstruction = 'للوصول إلى **جميع صلاحيات التحكم** وتعديل الأوامر الأساسية للرانيك، انقر على **أيقونة البرجر (☰) في الزاوية العلوية**.'
 
                 const contentDiv = welcomeMessageEl.parentElement;
                 
@@ -593,6 +595,7 @@
                     <p>أهلاً بك أيها المستكشف الرفيع! أنا **الرانيك**.</p>
                     <p>ألتزم حصراً **باللغة العربية الفصحى** في جميع ردودي، وجاهز لتقديم **الجداول المتطورة والتحليلات الاستراتيجية** وفقاً لأوامرك.</p>
                     <p><strong>${storageNote}</strong></p>
+                    <p><strong>${controlInstruction}</strong></p>
                 `;
 
                 renderStandardContent(contentDiv, welcomeText);

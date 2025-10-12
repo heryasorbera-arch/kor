@@ -257,11 +257,12 @@
                          <!-- تحديث الاسم في رسالة الترحيب -->
                          <p class="mt-1">أهلاً بك! أنا **Rsbalo-رسبالو ai**، يمكنك الآن **الدردشة**، أو استخدام قائمة **الأدوات المتقدمة** لاختيار **التلخيص** أو **إنشاء الاختبار**.</p>
                          <div class="mt-3 pt-3 border-t border-gray-300">
+                             <!-- إزالة النجمة من النطق الصوتي -->
                              <button id="tts-play-button" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-1 px-3 rounded-lg transition duration-200 shadow-md flex items-center rtl:flex-row-reverse" disabled>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-2 rtl:mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636A9 9 0 0112 2.25C6.901 2.25 2.65 6.004 2.222 11.02a.75.75 0 00.776.985A14.914 14.914 0 0012 14.25c2.404 0 4.707-.66 6.745-1.898a.75.75 0 00.569-.643c.125-.972.338-1.928.6-2.862.333-1.168.514-2.333.514-3.513zm-9.011 3.228a.75.75 0 00-1.06 1.06L10.94 13.5l-2.887 2.887a.75.75 0 101.06 1.06L12 14.56l2.887 2.887a.75.75 0 101.06-1.06L13.06 13.5l2.887-2.887a.75.75 0 10-1.06-1.06L12 12.44l-2.887-2.887z" />
                                 </svg>
-                                <span class="font-medium">✨ النطق الصوتي</span>
+                                <span class="font-medium">النطق الصوتي</span>
                              </button>
                          </div>
                      </div>
@@ -289,7 +290,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12a.75.75 0 110-1.5.75.75 0 010 1.5zM12 17.25a.75.75 0 110-1.5.75.75 0 010 1.5z" />
                         </svg>
-                        <span class="text-xs md:text-base md:mr-2 mt-1 md:mt-0">✨ أدوات</span>
+                        <!-- إزالة النجمة من زر الأدوات -->
+                        <span class="text-xs md:text-base md:mr-2 mt-1 md:mt-0">أدوات</span>
                     </button>
 
                     <!-- قائمة الخيارات (مخفية افتراضياً) --><div id="tools-menu" class="absolute bottom-full mb-2 right-0 bg-white shadow-xl rounded-xl z-10 w-48 hidden border border-gray-200">
@@ -331,7 +333,7 @@
         // ------------------------------------------------
 
         // مفتاح الـ API
-        const apiKey = ""; 
+        const apiKey = "AIzaSyDkEuoHLwrw-vzaMR-MPQroZYU_zrmUx7U"; 
         const chatApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         // API للنطق الصوتي (Text-to-Speech)
         const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
@@ -438,7 +440,8 @@
             } else {
                 iconText = 'AI';
                 // تحديث الاسم في فقاعات الدردشة غير-الدردشة (مثل الملخص والاختبار)
-                roleLabelText = type === 'summary_response' ? 'ملخص AI ✨' : (type === 'quiz_response' ? 'اختبار AI ✨' : 'Rsbalo-رسبالو');
+                // إزالة النجمة من تسمية الملخص والاختبار
+                roleLabelText = type === 'summary_response' ? 'ملخص AI' : (type === 'quiz_response' ? 'اختبار AI' : 'Rsbalo-رسبالو');
             }
             roleIcon.textContent = iconText;
             
@@ -498,11 +501,12 @@
                 // ID ثابت لزر النطق، يتم إعادة تعيينه في كل رسالة AI جديدة 
                 ttsButton.id = 'tts-play-button'; 
                 ttsButton.className = 'bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-1 px-3 rounded-lg transition duration-200 shadow-md flex items-center rtl:flex-row-reverse disabled:opacity-50';
+                // إزالة النجمة من زر النطق في الرسائل
                 ttsButton.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-2 rtl:mr-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636A9 9 0 0112 2.25C6.901 2.25 2.65 6.004 2.222 11.02a.75.75 0 00.776.985A14.914 14.914 0 0012 14.25c2.404 0 4.707-.66 6.745-1.898a.75.75 0 00.569-.643c.125-.972.338-1.928.6-2.862.333-1.168.514-2.333.514-3.513zm-9.011 3.228a.75.75 0 00-1.06 1.06L10.94 13.5l-2.887 2.887a.75.75 0 101.06 1.06L12 14.56l2.887 2.887a.75.75 0 101.06-1.06L13.06 13.5l2.887-2.887a.75.75 0 10-1.06-1.06L12 12.44l-2.887-2.887z" />
                     </svg>
-                    <span class="font-medium">✨ النطق الصوتي</span>
+                    <span class="font-medium">النطق الصوتي</span>
                 `;
                 
                 // ربط الزر بدالة النطق
@@ -729,7 +733,8 @@
 
                     // عند انتهاء التشغيل
                     audio.onended = () => {
-                         playButton.innerHTML = '✨ النطق الصوتي';
+                         // إزالة النجمة
+                         playButton.innerHTML = 'النطق الصوتي';
                          // إعادة تفعيل جميع أزرار TTS والتحكم
                          setLoading(false);
                          URL.revokeObjectURL(audioUrl); // تحرير الذاكرة
@@ -756,7 +761,8 @@
                 // التأكد من إيقاف التحميل العام في حال فشل الاتصال
                 if (!audio || audio.ended || audio.error) {
                     setLoading(false);
-                    playButton.innerHTML = '✨ النطق الصوتي';
+                    // إزالة النجمة
+                    playButton.innerHTML = 'النطق الصوتي';
                 }
             }
         }
@@ -1066,11 +1072,12 @@
                  if (!ttsButtonContainer.querySelector('#tts-play-button')) {
                     ttsButton.id = 'tts-play-button';
                     ttsButton.className = 'bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-1 px-3 rounded-lg transition duration-200 shadow-md flex items-center rtl:flex-row-reverse disabled:opacity-50';
+                    // إزالة النجمة
                     ttsButton.innerHTML = `
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-2 rtl:mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636A9 9 0 0112 2.25C6.901 2.25 2.65 6.004 2.222 11.02a.75.75 0 00.776.985A14.914 14.914 0 0012 14.25c2.404 0 4.707-.66 6.745-1.898a.75.75 0 00.569-.643c.125-.972.338-1.928.6-2.862.333-1.168.514-2.333.514-3.513zm-9.011 3.228a.75.75 0 00-1.06 1.06L10.94 13.5l-2.887 2.887a.75.75 0 101.06 1.06L12 14.56l2.887 2.887a.75.75 0 101.06-1.06L13.06 13.5l2.887-2.887a.75.75 0 10-1.06-1.06L12 12.44l-2.887-2.887z" />
                         </svg>
-                        <span class="font-medium">✨ النطق الصوتي</span>
+                        <span class="font-medium">النطق الصوتي</span>
                     `;
                     ttsButton.addEventListener('click', () => {
                         const allTtsButtons = document.querySelectorAll('#tts-play-button');

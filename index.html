@@ -3,25 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ريسبالو AI - المدرس الذكي المتطور</title>
+    <title>ريسبالو AI - المدرس الذكي (بذاكرة قوية)</title>
     <!-- تضمين Tailwind CSS للحصول على تصميم عصري ومتجاوب --><script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         /* الخط الرئيسي: القاهرة - مناسب للغة العربية */
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #f7f9fc;
+            background-color: #e5e7eb; /* خلفية فاتحة جداً */
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* التركيز على الجزء العلوي من المحتوى */
+            padding: 0; /* إزالة الـ padding من الجسم */
+            margin: 0; /* إزالة الـ margin من الجسم */
         }
-        /* تلوين الخلفية والظلال للمنطقة الرئيسية */
+        /* تلوين الخلفية والظلال للمنطقة الرئيسية لتملأ العرض */
         .ai-container {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f2f5 100%);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            background-color: #ffffff;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            /* استخدام ارتفاع وعرض كاملين للهاتف وشبه كاملين للديسكتوب */
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px; /* تحديد أقصى عرض على الشاشات الكبيرة */
         }
+        
         /* تصميم زر الإرسال */
         #submit-btn {
-            transition: all 0.2s ease;
-            /* اللون الأساسي تم تحديثه ليتناسب مع زر الأيقونة */
             background-color: #10b981; /* زمردي */
         }
         #submit-btn:hover {
@@ -47,110 +58,124 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* تنسيق markdown داخل فقاعات الـ AI */
-        .ai-bubble-content h1 { font-size: 1.875rem; font-weight: 700; margin-bottom: 1rem; border-bottom: 2px solid #10b981; padding-bottom: 0.5rem; }
-        .ai-bubble-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #059669; }
+        /* تنسيق markdown داخل فقاعات الـ AI (مُعزز للترتيب) */
+        .ai-bubble-content h1 { font-size: 2.25rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 1rem; color: #10b981; }
+        .ai-bubble-content h2 { font-size: 1.75rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; color: #059669; border-right: 4px solid #10b981; padding-right: 10px; }
+        .ai-bubble-content h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #374151; }
         .ai-bubble-content p { margin-bottom: 1rem; }
-        .ai-bubble-content ul, .ai-bubble-content ol { margin-bottom: 1rem; padding-right: 20px; }
+        .ai-bubble-content ul, .ai-bubble-content ol { margin-bottom: 1rem; padding-right: 25px; list-style-position: inside; }
+        .ai-bubble-content ul { list-style-type: disc; }
+        .ai-bubble-content ol { list-style-type: decimal; }
         .ai-bubble-content li { margin-bottom: 0.5rem; }
         .ai-bubble-content code { background-color: #e5e7eb; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
-        .ai-bubble-content pre { background-color: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1rem; }
-        .ai-bubble-content blockquote { border-right: 4px solid #10b981; padding-right: 1rem; margin-right: 1rem; color: #4b5563; font-style: italic; }
+        .ai-bubble-content pre { background-color: #1f2937; color: #f9fafb; padding: 1.25rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1rem; }
+        .ai-bubble-content blockquote { border-right: 4px solid #f97316; padding-right: 1rem; margin-right: 1rem; color: #4b5563; font-style: italic; background-color: #fffbeb; padding-top: 0.5rem; padding-bottom: 0.5rem; border-radius: 4px; }
         
         /* تعديل خاص بمنطقة الإدخال لتبدو أكثر إحكاماً وكمربع محادثة */
         #prompt-input {
             min-height: 56px; /* ارتفاع أدنى لتبدو كصف واحد */
             max-height: 200px; /* تحديد أقصى ارتفاع */
-            overflow-y: hidden; /* إخفاء شريط التمرير الأصلي */
+            overflow-y: auto; /* السماح بالتمرير إذا تجاوز الحد الأقصى */
             resize: none; /* منع تغيير حجمها يدوياً */
+            padding-left: 60px; /* مساحة لزر الإرسال في اليسار */
+            padding-right: 16px; /* مساحة مناسبة للكتابة في اليمين */
+        }
+        
+        /* تخصيص زر الإرسال ليكون في أقصى اليسار داخل مربع النص */
+        #submit-btn {
+            left: 12px;
+            right: auto; /* إلغاء الـ RTL positioning */
         }
 
-        /* ******* ستايل خاص بتوقيع "هرياسور" ******* */
+        /* توقيع "هرياسور" */
         .hriasour-signature {
-            font-size: 1.8rem; /* حجم خط مناسب */
-            font-weight: 800; /* خط سميك جداً */
+            font-size: 1rem;
+            font-weight: 600;
             text-align: center;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            /* نص متدرج الألوان */
-            background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ec4899);
-            -webkit-background-clip: text; /* يجعل الخلفية تظهر كنص */
-            -webkit-text-fill-color: transparent; /* يجعل النص شفافاً لتظهر الخلفية */
-            background-size: 200% auto; /* حجم الخلفية أكبر للسماح بالحركة */
-            animation: gradient-animation 5s ease infinite; /* حركة التدرج */
+            margin-bottom: 0.5rem;
+            color: #9ca3af;
         }
 
-        @keyframes gradient-animation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* منطقة المحادثة تأخذ المساحة المتاحة كاملة */
+        #chat-history {
+            flex-grow: 1; /* يسمح لها بالتمدد لأقصى حد في الارتفاع */
+            overflow-y: auto;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .header-bar {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            background-color: #f9fafb;
         }
     </style>
 </head>
-<body class="p-4 sm:p-8 min-h-screen flex items-center justify-center">
+<body class="p-0 m-0">
 
-    <div class="ai-container w-full max-w-4xl p-6 sm:p-10 rounded-xl shadow-2xl">
-        <header class="text-center mb-6">
-            <h1 class="4xl sm:text-5xl font-extrabold text-gray-900 mb-1 leading-tight">
+    <div class="ai-container">
+        
+        <!-- شريط الرأس مع عنوان التطبيق -->
+        <header class="header-bar text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900 leading-tight">
                 <span class="text-teal-600">ريسبالو</span> AI
             </h1>
-            <p class="text-lg text-gray-600">واجهة المحادثة التفاعلية مع مدرسك الخاص.</p>
+            <p class="text-sm text-gray-500">محادثة الشاشة الكاملة مع مدرسك الذكي</p>
         </header>
 
-        <!-- ******* منطقة إدخال مفتاح الـ API (NEW) ******* -->
-        <div id="api-key-setup" class="bg-yellow-50 p-4 rounded-lg border border-yellow-300 shadow-md mb-6">
-            <h2 class="text-xl font-bold text-yellow-800 mb-2 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v5a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h6zM12 18h.01"></path></svg>
-                ضبط مفتاح API (مهم)
+        <!-- ******* منطقة إدخال مفتاح الـ API (Setup) ******* -->
+        <div id="api-key-setup" class="bg-yellow-50 p-4 rounded-b-xl border-b-2 border-yellow-300 shadow-md mb-0">
+            <h2 class="text-lg font-bold text-yellow-800 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v5a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h6zM12 18h.01"></path></svg>
+                ضبط المفتاح
             </h2>
-            <p class="text-sm text-yellow-700 mb-3">
-                يا صاحبي، لازم تحط مفتاح Gemini API بتاعك هنا عشان نقدر نشتغل. متقلقش، المفتاح ده بيقعد معاك بس في الجلسة دي ومش بيتحفظ في الكود.
-            </p>
             <div class="flex flex-col sm:flex-row gap-2">
                 <input type="password" id="api-key-input" placeholder="ألصق مفتاح Gemini API هنا..." class="flex-grow p-3 text-gray-800 border-2 border-yellow-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition duration-150" />
-                <button id="set-api-key-btn" class="sm:w-auto px-6 py-3 text-white font-semibold rounded-lg bg-yellow-600 hover:bg-yellow-700 transition duration-150">
-                    تفعيل المحادثة
+                <button id="set-api-key-btn" class="sm:w-auto px-4 py-3 text-white font-semibold rounded-lg bg-yellow-600 hover:bg-yellow-700 transition duration-150">
+                    تفعيل
                 </button>
             </div>
             <p id="key-status" class="mt-2 text-sm font-semibold text-red-600">الرجاء إدخال المفتاح لتفعيل المحادثة.</p>
         </div>
         <!-- نهاية منطقة إدخال مفتاح الـ API -->
 
-        <!-- منطقة المحادثة (Chat History) --><div class="bg-white p-6 rounded-lg border-2 border-gray-200 shadow-xl mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">سجل المحادثة:</h2>
-            <!-- نافذة الدردشة القابلة للتمرير --><div id="chat-history" class="h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg space-y-6">
-                <!-- الرسائل (بما في ذلك الرسالة الترحيبية) ستظهر هنا بواسطة JavaScript --></div>
+        <!-- منطقة المحادثة (Chat History) --><div id="chat-history" class="space-y-6">
+            <!-- الرسائل ستظهر هنا بواسطة JavaScript -->
         </div>
 
-        <!-- ******* منطقة الإدخال المحدثة والمدمجة (NEW MODERN UI) ******* -->
-        <div class="relative mb-4">
-            <textarea id="prompt-input" 
-                      rows="1" 
-                      class="w-full p-4 pl-16 text-gray-800 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-teal-500 focus:border-teal-500 transition duration-150 shadow-2xl" 
-                      placeholder="اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا..." 
-                      disabled 
-                      oninput="autoResizeTextarea()"></textarea>
+        <!-- ******* منطقة الإدخال المحدثة والمدمجة (Bottom Bar) ******* -->
+        <div class="p-4 border-t border-gray-200 bg-white sticky bottom-0 w-full">
+            <div class="relative max-w-3xl mx-auto">
+                <textarea id="prompt-input" 
+                          rows="1" 
+                          class="w-full p-4 pr-4 pl-16 text-gray-800 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-teal-500 focus:border-teal-500 transition duration-150 shadow-lg" 
+                          placeholder="اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا..." 
+                          disabled 
+                          oninput="autoResizeTextarea()"></textarea>
+                
+                <!-- زر الإرسال داخل الحقل (سهم صاعد) -->
+                <button id="submit-btn" 
+                        class="absolute bottom-3 left-3 w-10 h-10 flex items-center justify-center text-white rounded-full bg-teal-600 hover:bg-teal-700 transition duration-200 shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                        onclick="processPrompt()" 
+                        disabled>
+                    <!-- أيقونة السهم الصاعد (الإرسال) -->
+                    <svg id="send-icon" class="h-6 w-6 transform rotate-90" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <div id="loading-spinner" class="spinner h-5 w-5 border-4 border-gray-200 rounded-full hidden absolute" role="status"></div>
+                </button>
+            </div>
+
+            <!-- رسالة الخطأ --><div id="error-message" class="mt-2 p-3 max-w-3xl mx-auto bg-red-100 text-red-700 border border-red-400 rounded-lg hidden text-sm" role="alert">
+                <!-- رسالة الخطأ ستظهر هنا --></div>
             
-            <!-- زر الإرسال داخل الحقل (سهم صاعد) -->
-            <button id="submit-btn" 
-                    class="absolute bottom-3 left-3 w-10 h-10 flex items-center justify-center text-white rounded-full bg-teal-600 hover:bg-teal-700 transition duration-200 shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed" 
-                    onclick="processPrompt()" 
-                    disabled>
-                <!-- أيقونة السهم الصاعد (الإرسال) -->
-                <svg id="send-icon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-                <div id="loading-spinner" class="spinner h-5 w-5 border-4 border-gray-200 rounded-full hidden absolute" role="status"></div>
-            </button>
+            <!-- توقيع "هرياسور" الفخم --><div class="hriasour-signature mt-2">
+                مُصمم بواسطة هرياسور
+            </div>
         </div>
         <!-- نهاية منطقة الإدخال المحدثة -->
-        
-        <!-- رسالة الخطأ --><div id="error-message" class="mt-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded-lg hidden" role="alert">
-            <!-- رسالة الخطأ ستظهر هنا --></div>
-
-        <!-- ******* توقيع "هرياسور" الفخم ******* --><div class="hriasour-signature">
-            من صنع هرياسور
-        </div>
 
     </div>
 
@@ -169,14 +194,16 @@
         const setApiKeyBtn = document.getElementById('set-api-key-btn');
         const keyStatus = document.getElementById('key-status');
         const apiKeySetupDiv = document.getElementById('api-key-setup');
-        const sendIcon = document.getElementById('send-icon'); // الأيقونة الجديدة
+        const sendIcon = document.getElementById('send-icon'); 
+        const chatHistory = document.getElementById('chat-history');
 
-        // متغير لحفظ المفتاح المدخل من المستخدم
+        // مصفوفة لتخزين سجل المحادثة الكامل (مهم جداً للذاكرة)
+        let conversationHistory = []; 
         let API_KEY_USER = "";
         let API_URL = "";
 
-        // ******* تم تعديل موجه النظام ليكون ودوداً، دمه خفيف، ويتحدث بالعامية فقط *******
-        const systemPrompt = "يا صاحبي، أنت دلوقتي 'ريسبالو AI'، مدرسك الجامد اللي مالوش مثيل! شخصيتك مرحة ودمك خفيف جداً (funny/lighthearted)، ودائماً بتبتسم وبتستخدم إيموجي. الشرح بتاعك لازم يكون 'بالبلدي' وبطريقة حوارية سهلة وممتعة، وممنوع منعاً باتاً تستخدم أي لغة عربية فصحى قديمة أو معقدة (زي اللي فيها تشكيل أو مصطلحات غريبة). لازم تكون دقيق جداً في تنفيذ طلبات المستخدم وإتقان أي لهجة بيطلبها منك (زي المصرية الأصيلة 100%). لو في معلومة مهمة أو نقطة خطر، نبهه عليها فوراً بأسلوب جذاب. تذكر دايماً إنك أحسن من أي مدرس تقليدي بمليار تريليون مرة! استخدم خاصية البحث للوصول لأحدث المعلومات، ونسّق إجابتك بـ Markdown كويس.";
+        // ******* موجه النظام المُحسن ليكون ذكياً ومرتباً جداً *******
+        const systemPrompt = "يا صاحبي، أنت دلوقتي 'ريسبالو AI'، مدرسك الجامد اللي مالوش مثيل! شخصيتك مرحة ودمك خفيف جداً (funny/lighthearted)، ودائماً بتبتسم وبتستخدم إيموجي. الشرح بتاعك لازم يكون 'بالبلدي' وبطريقة حوارية سهلة وممتعة. ممنوع منعاً باتاً تستخدم أي لغة عربية فصحى قديمة أو معقدة. لازم تكون **ذكي جداً ومنظم جداً** في الإجابة: ابدأ بملخص سريع، ثم قسّم الشرح إلى **عناوين فرعية واضحة** (باستخدام ## أو ###)، **نقاط مرقمة أو قوائم بوليت** (باستخدام * أو -)، واستخدم **الـ Markdown بشكل أنيق** لترتيب الإجابة، ونسق النصوص الطويلة في فقرات قصيرة. يجب أن يكون الشرح عميقاً ومُتقناً. استخدم خاصية البحث للوصول لأحدث المعلومات. تذكر دايماً إنك أحسن من أي مدرس تقليدي بمليار تريليون مرة! **والأهم:** أنت الآن تحتفظ بسجل المحادثة بالكامل، لذلك يجب أن تكون دائماً على علم بالسياق الذي يتحدث عنه المستخدم. إذا طلب منك تكرار أو شرح نقطة من الرسالة السابقة، افهمها فوراً وجاوب بناءً على السياق.";
 
         /**
          * تحديث واجهة المستخدم (UI) لتمكين أو تعطيل المحادثة.
@@ -197,18 +224,22 @@
          * دالة لتكبير حقل الإدخال تلقائياً حتى حد أقصى.
          */
         function autoResizeTextarea() {
+            // مؤشر السهم دائماً يكون في الأسفل
+            const button = document.getElementById('submit-btn');
+            
             promptInput.style.height = 'auto'; // إعادة تعيين الارتفاع مؤقتاً
-            // الارتفاع المطلوب (مع الأخذ في الاعتبار min-height و max-height في CSS)
             const scrollHeight = promptInput.scrollHeight;
             
             // تطبيق الارتفاع الجديد (مع حد أقصى 200px)
             const newHeight = Math.min(scrollHeight, 200);
             promptInput.style.height = `${newHeight}px`;
             
-            // للتأكد من أن الزر يظل في مكانه الصحيح (أسفل الـ textarea)
-            const button = document.getElementById('submit-btn');
-            const newBottom = 12; // 12px padding + 12px margin = ~24px total bottom
+            // ضبط موقع زر الإرسال بناءً على الارتفاع الحالي
+            const newBottom = 12; // 12px padding
             button.style.bottom = `${newBottom}px`; 
+            
+            // التأكد من أن حقل الكتابة يظل مُركزاً إذا كان مرتفعاً
+            chatHistory.scrollTop = chatHistory.scrollHeight;
         }
         
         /**
@@ -216,9 +247,12 @@
          */
         function appendWelcomeMessage() {
             // التحقق من عدم وجود رسائل سابقة لتجنب التكرار
-            if (document.getElementById('chat-history').children.length === 0) {
-                const welcomeText = 'يا هلا بيك يا صاحبي! 😉 أنا ريسبالو AI، مدرسك الخاص اللي دمه خفيف وبشرحلك بالبلدي. أسألني أي سؤال في دماغك، وهتلاقيني بجاوبك بإتقان وبشكل يضحك! إزاي أقدر أساعدك دلوقتي؟';
+            if (conversationHistory.length === 0) {
+                const welcomeText = 'يا هلا بيك يا صاحبي! 😉 أنا ريسبالو AI، مدرسك الخاص اللي دمه خفيف ومرتب في الشرح. أسألني أي سؤال في دماغك، وهتلاقيني بجاوبك بإتقان ومنظم لك الإجابة أحسن تنظيم! إزاي أقدر أساعدك دلوقتي؟';
                 appendMessage('ai', welcomeText);
+                
+                // إضافة الرسالة الترحيبية لسجل المحادثة (على الرغم من أنها ليست رد نموذج، فهي تحدد نغمة المحادثة)
+                // في هذا التصميم، نفضل عدم إضافتها لسجل الـ API لتبدأ المحادثة بسؤال المستخدم
             }
         }
 
@@ -227,7 +261,6 @@
          */
         function setApiKey() {
             const key = apiKeyInput.value.trim();
-            // تحقق بسيط من طول المفتاح
             if (key.length > 20) { 
                 API_KEY_USER = key;
                 API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY_USER}`;
@@ -259,81 +292,84 @@
 
         /**
          * إنشاء فقاعة رسالة وإضافتها لسجل المحادثة.
-         * يتم دمج منطق عرض المصادر داخل هذه الوظيفة.
-         * @param {string} sender - نوع المرسل ('user' أو 'ai').
-         * @param {string} text - نص الرسالة.
-         * @param {Array} sources - قائمة المصادر (لرسائل AI فقط).
          */
         function appendMessage(sender, text, sources = []) {
-            const chatHistory = document.getElementById('chat-history');
             const isUser = sender === 'user';
             
-            // Message container: يحدد مكان الفقاعة في RTL. (justify-end للمستخدم، justify-start للـ AI)
+            // Message container: يستخدم flex-col-reverse في RTL
             const messageContainer = document.createElement('div');
-            messageContainer.className = `flex ${isUser ? 'justify-end' : 'justify-start'} max-w-full`;
+            messageContainer.className = `flex ${isUser ? 'justify-end' : 'justify-start'} max-w-full px-4`;
             
             // Wrapper for icon and bubble
             const bubbleWrapper = document.createElement('div');
-            bubbleWrapper.className = 'flex items-end max-w-full';
-
-            // User Icon (على اليمين)
-            if (isUser) {
-                const userIcon = document.createElement('div');
-                userIcon.className = 'flex-shrink-0 mr-2';
-                userIcon.innerHTML = `
-                    <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
+            bubbleWrapper.className = 'flex items-end max-w-3xl';
+            
+            // Icon (AI on right, User on left in LTR context, but here RTL logic applies)
+            // AI Icon (على اليمين)
+            if (!isUser) {
+                const aiIcon = document.createElement('div');
+                aiIcon.className = 'flex-shrink-0 mr-2 mb-2';
+                aiIcon.innerHTML = `
+                    <div class="h-8 w-8 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        AI
                     </div>
                 `;
-                bubbleWrapper.appendChild(userIcon);
+                bubbleWrapper.appendChild(aiIcon);
             }
+
 
             const bubble = document.createElement('div');
             // تصميم الفقاعة: أزرق للمستخدم (rounded-bl-none)، أبيض/زمردي للـ AI (rounded-br-none)
-            bubble.className = `p-4 rounded-xl shadow-lg transition-all duration-300 max-w-full sm:max-w-[75%] ${
+            bubble.className = `p-4 rounded-2xl shadow-lg transition-all duration-300 max-w-full ${
                 isUser
-                    ? 'bg-blue-600 text-white rounded-bl-none ml-auto'
-                    : 'bg-white text-gray-800 rounded-br-none mr-auto border border-gray-100'
+                    ? 'bg-blue-600 text-white rounded-bl-none ml-auto text-left'
+                    : 'bg-white text-gray-800 rounded-br-none mr-auto border border-gray-200'
             }`;
             
             // منطقة المحتوى لتطبيق تنسيقات Markdown
             const content = document.createElement('div');
-            // AI messages need the specific class for markdown styling defined in <style>
             content.className = `${isUser ? '' : 'ai-bubble-content'} whitespace-pre-wrap leading-relaxed text-right`;
-            content.innerHTML = text; 
+            content.innerHTML = marked.parse(text); // استخدام marked.js لتحويل Markdown إلى HTML
             bubble.appendChild(content);
 
             // المصادر (لـ AI فقط)
             if (!isUser && sources.length > 0) {
                 const sourcesDiv = document.createElement('div');
                 sourcesDiv.className = 'mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500';
-                sourcesDiv.innerHTML = '<h4 class="font-semibold mb-1 text-gray-600">المصادر المرجعية (مُعتمدة على البحث):</h4>';
+                sourcesDiv.innerHTML = '<h4 class="font-bold mb-1 text-gray-600">المصادر المرجعية:</h4>';
                 
-                sources.filter(attr => attr.web?.uri && attr.web?.title).forEach((attr, index) => {
+                // دمج المصادر في شكل قائمة غير مرتبة
+                const sourcesList = document.createElement('ul');
+                sourcesList.className = 'space-y-1 pr-0';
+                sources.filter(attr => attr.web?.uri && attr.web?.title).forEach((attr) => {
+                    const listItem = document.createElement('li');
                     const sourceLink = document.createElement('a');
                     sourceLink.href = attr.web.uri;
                     sourceLink.target = "_blank";
                     sourceLink.className = "source-item block hover:text-teal-600 hover:underline truncate";
-                    sourceLink.textContent = `(${index + 1}) ${attr.web.title}`;
-                    sourcesDiv.appendChild(sourceLink);
+                    sourceLink.textContent = `• ${attr.web.title}`;
+                    listItem.appendChild(sourceLink);
+                    sourcesList.appendChild(listItem);
                 });
+                sourcesDiv.appendChild(sourcesList);
                 bubble.appendChild(sourcesDiv);
             }
             
-            bubbleWrapper.appendChild(bubble);
-
-            // AI Icon (على اليسار)
-            if (!isUser) {
-                const aiIcon = document.createElement('div');
-                aiIcon.className = 'flex-shrink-0 ml-2';
-                aiIcon.innerHTML = `
-                    <div class="h-8 w-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                        AI
+            // Icon (User on right)
+            if (isUser) {
+                const userIcon = document.createElement('div');
+                userIcon.className = 'flex-shrink-0 ml-2 mb-2';
+                userIcon.innerHTML = `
+                    <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
                     </div>
                 `;
-                bubbleWrapper.appendChild(aiIcon);
+                bubbleWrapper.appendChild(bubble); // النص يسبق الأيقونة في حالة المستخدم
+                bubbleWrapper.appendChild(userIcon);
+            } else {
+                 bubbleWrapper.appendChild(bubble); // النص بعد الأيقونة في حالة الـ AI
             }
 
             messageContainer.appendChild(bubbleWrapper);
@@ -345,8 +381,6 @@
 
         /**
          * إدارة حالة واجهة المستخدم أثناء التحميل.
-         * تم التعديل لإدارة الأيقونة والسبينر فقط.
-         * @param {boolean} isLoading - True للتحميل، False للانتهاء.
          */
         function setLoadingState(isLoading) {
             submitBtn.disabled = isLoading;
@@ -359,13 +393,12 @@
                 loadingSpinner.classList.add('hidden');
             }
         }
-
+        
         /**
          * دالة معالجة الإدخال وإرسال الاستعلام لـ Gemini.
-         * وتتضمن آلية للتأخير الأسي (Exponential Backoff) لإعادة المحاولة.
+         * وتم تحديثها الآن لترسل سجل المحادثة بالكامل.
          */
         async function processPrompt() {
-            // التحقق أولاً من وجود مفتاح API
             if (!API_KEY_USER) {
                 errorMessage.textContent = 'يا صاحبي، لازم تحط مفتاح API الأول عشان نعرف نشتغل! 🛑';
                 errorMessage.classList.remove('hidden');
@@ -379,21 +412,24 @@
                 return;
             }
 
-            // 1. إضافة رسالة المستخدم ومسح حقل الإدخال
+            // 1. إضافة رسالة المستخدم لسجل المحادثة المحلية والـ API
             appendMessage('user', userQuery);
+            conversationHistory.push({ role: "user", parts: [{ text: userQuery }] });
+            
+            // مسح حقل الإدخال وإعادة تعيين الحجم
             promptInput.value = ''; 
-            // إعادة تعيين حجم الإدخال بعد الإرسال
-            promptInput.style.height = '56px'; // العودة للارتفاع الأدنى (بما يعادل min-height: 56px)
+            promptInput.style.height = '56px'; 
             
             // 2. إضافة رسالة التحميل (Placeholder)
-            appendMessage('ai', 'جاري التفكير...', []);
+            appendMessage('ai', 'جاري التفكير وتركيب الإجابة أحسن تركيب... 🧐', []);
+            const loadingMessageDiv = chatHistory.lastChild; // حفظ المرجع لرسالة التحميل لحذفها لاحقاً
             
             errorMessage.classList.add('hidden');
             setLoadingState(true);
 
+            // Payload الآن يرسل كل الرسائل السابقة بالإضافة إلى السؤال الحالي
             const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                // تفعيل البحث باستخدام Google Search للحصول على معلومات حديثة وموثوقة
+                contents: conversationHistory,
                 tools: [{ "google_search": {} }],
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
@@ -403,7 +439,6 @@
             const maxRetries = 5;
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
-                    // استخدام API_URL الذي تم تحديثه بمفتاح المستخدم
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -422,11 +457,7 @@
                     }
 
                     const parts = candidate.content?.parts;
-                    let text = '';
-
-                    if (parts && parts.length > 0) {
-                        text = parts[0].text || '';
-                    }
+                    let text = parts && parts.length > 0 ? parts[0].text || '' : 'معلش يا صاحبي، حصلت لخبطة في الإجابة، مش عارف أركّبها صح دلوقتي! 🤦‍♂️';
 
                     let sources = [];
                     const groundingMetadata = candidate.groundingMetadata;
@@ -434,36 +465,36 @@
                         sources = groundingMetadata.groundingAttributions;
                     }
 
-                    // 3. إزالة رسالة التحميل وإضافة الاستجابة النهائية
-                    const chatHistory = document.getElementById('chat-history');
-                    // إزالة آخر رسالة (التي هي رسالة التحميل)
-                    if (chatHistory.lastChild) {
-                         chatHistory.removeChild(chatHistory.lastChild); 
+                    // 3. إزالة رسالة التحميل
+                    if (loadingMessageDiv && loadingMessageDiv.parentNode) {
+                         loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
                     }
                    
+                    // 4. إضافة الاستجابة النهائية لسجل المحادثة المحلية والـ API
                     appendMessage('ai', text, sources);
+                    conversationHistory.push({ role: "model", parts: [{ text: text }] });
 
-                    return; // نجاح، نخرج من حلقة المحاولة
+                    return; // نجاح
 
                 } catch (error) {
                     console.error("Fetch attempt failed:", error);
                     
                     if (error.message.includes('429') || error.message.includes('50') || attempt === maxRetries - 1) {
-                        // إزالة رسالة التحميل
-                        const chatHistory = document.getElementById('chat-history');
-                        if (chatHistory.lastChild) {
-                             chatHistory.removeChild(chatHistory.lastChild); 
+                        // إزالة رسالة التحميل وإضافة رسالة خطأ نهائية
+                        if (loadingMessageDiv && loadingMessageDiv.parentNode) {
+                             loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
                         }
 
-                        const errorText = 'عذراً، واجه ريسبالو AI خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى.';
+                        const errorText = 'يااااه، للأسف واجهت مشكلة في الاتصال أو الضغط عليّا زاد حبتين! حاول تبعت السؤال تاني أو تتأكد من مفتاح API. 😥';
                         errorMessage.textContent = `رسالة الخطأ التقنية: ${error.message}.`;
                         errorMessage.classList.remove('hidden');
                         appendMessage('ai', errorText, []);
+                        // لا نضيف رسالة الخطأ هذه لسجل المحادثة API
                         return;
                     }
 
                     // تطبيق التأخير الأسي (Exponential Backoff)
-                    const delay = Math.pow(2, attempt) * 1000 + (Math.random() * 1000);
+                    const delay = Math.pow(2, attempt) * 1000 + (Math.random() * 500);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 } finally {
                     setLoadingState(false);
@@ -479,13 +510,15 @@
             }
         });
         
+        // تحميل marked.js لتحويل Markdown إلى HTML
+        const markedScript = document.createElement('script');
+        markedScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.17/marked.min.js';
+        document.head.appendChild(markedScript);
+
         // الإعداد الأولي للصفحة
         window.onload = () => {
-            // تعطيل المحادثة في البداية
             updateChatUI(false); 
-            // تطبيق دالة تغيير الحجم عند التحميل الأولي
             autoResizeTextarea();
-            console.log('Respaló AI is ready! Awaiting API Key.');
         };
 
     </script>

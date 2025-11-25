@@ -3,1095 +3,491 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام رفيق الذكاء الاصطناعي (وضع فاتح وجميل)</title>
-    <!-- تحميل مكتبة Tailwind CSS للتصميم المتجاوب --><script src="https://cdn.tailwindcss.com"></script>
-    <!-- استخدام خط Inter لمظهر عصري ونظيف (ChatGPT Style) --><style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        
-        /* -------------------------------------------
-           متغيرات الألوان (الوضع الفاتح - نظيف وعصري)
-           ------------------------------------------- */
-        :root {
-            --light-primary: #1c92d2; /* Clean Blue (لون أساسي للأزرار) */
-            --light-secondary: #e5e7eb; /* Soft Gray (خلفية رسائل AI) */
-            --light-bg: #f9fafb;     /* Very Light Gray (خلفية الصفحة) */
-            --light-container: #ffffff; /* White (خلفية التطبيق) */
-            --dark-text: #1f2937;    /* Dark Gray (لون النص الافتراضي) */
-        }
-
+    <title>ريسبالو AI - المدرس الذكي المتطور</title>
+    <!-- تضمين Tailwind CSS للحصول على تصميم عصري ومتجاوب --><script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* الخط الرئيسي: القاهرة - مناسب للغة العربية */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-bg); 
-            color: var(--dark-text); 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        /* إزالة التوهج النيون واستبداله بظل ناعم */
-        .high-glow {
-            /* ظل ناعم للإدخال والأزرار */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-            transition: all 0.2s;
-            border: 1px solid transparent; 
-        }
-
-        /* تصميم نص العنوان */
-        .header-text-shadow {
-            color: var(--dark-text);
-            font-weight: 800;
-        }
-
-        /* تخصيص حاوية التطبيق */
-        #app {
-            background-color: var(--light-container);
-            /* ظل ناعم للمسة حديثة */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
-        }
-
-        /* تصميم شريط التمرير ليناسب الثيم الفاتح */
-        #chat-window::-webkit-scrollbar {
-            width: 8px;
-        }
-        #chat-window::-webkit-scrollbar-track {
-            background: #f1f1f1; /* Light track */
-            border-radius: 10px;
-        }
-        #chat-window::-webkit-scrollbar-thumb {
-            background: #bdbdbd; /* Gray thumb */
-            border-radius: 10px;
-        }
-        #chat-window::-webkit-scrollbar-thumb:hover {
-            background: #a3a3a3; 
-        }
-
-        /* تصميم أزرار الإرسال والأدوات (قاعدة اللون الأزرق النظيف) */
-        #send-button, #tools-toggle-button {
-            background: var(--light-primary);
-            color: var(--light-container); /* نص أبيض على خلفية زرقاء */
-            font-weight: 600;
-            border: none;
-        }
-        /* تأثير عند تمرير الماوس (Hover Effect) - أزرق أغمق قليلاً */
-        #send-button:hover:not(:disabled), #tools-toggle-button:hover:not(:disabled) {
-            background: #17719f; 
-            box-shadow: 0 6px 10px rgba(28, 146, 210, 0.3);
-            transform: translateY(-1px);
-        }
-        /* تصميم الزر المعطل */
-        #send-button:disabled, #tools-toggle-button:disabled {
-            background: #9ca3af; /* Grayed out when disabled */
-        }
-
-
-        /* تصميم حقل الإدخال - نظيف وخالٍ من الحدود المزعجة */
-        #user-input {
-            background-color: var(--light-container); 
-            color: var(--dark-text);
-            border: 1px solid #d1d5db; /* Light Gray border */
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* ظل خفيف جداً */
-            resize: none; 
-        }
-        #user-input:focus {
-            border-color: var(--light-primary);
-            box-shadow: 0 0 0 2px rgba(28, 146, 210, 0.3); /* حلقة تركيز زرقاء ناعمة */
-        }
-        
-        /* -------------------------------------------
-           تصميم فقاعات الدردشة (ChatGPT Style)
-           ------------------------------------------- */
-        
-        /* الحاوية التي تحدد لون الخلفية الأساسي لكل رسالة */
-        .message-row {
-            padding: 1rem 0;
-            border-bottom: 1px solid #f3f4f6; /* فاصل خفيف جداً بين الرسائل */
-        }
-        
-        /* تصميم رسائل الذكاء الاصطناعي (خلفية رمادية ناعمة) */
-        .ai-message-row {
-            background-color: var(--light-secondary); /* Soft Gray */
-            color: var(--dark-text);
-        }
-
-        /* تصميم رسائل المستخدم (خلفية بيضاء شفافة) */
-        .user-message-row {
-            background-color: var(--light-container); /* White/Transparent */
-            color: var(--dark-text);
-        }
-        
-        /* النمط الداخلي للرسالة داخل الصف */
-        .message-bubble {
-            max-width: 800px; /* زيادة عرض الرسالة في التصميم الحديث */
-            padding: 0 1rem;
-            margin: 0 auto;
-            display: flex; /* لترتيب الأيقونة/التسمية مع النص */
-            align-items: flex-start;
-        }
-        
-        /* تصميم الأيقونة/التسمية */
-        .role-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.8rem;
-            flex-shrink: 0; /* منع الأيقونة من الانكماش */
-            margin-inline-end: 1rem;
-            color: white;
-            
-        }
-
-        /* أيقونة المستخدم (أزرق) */
-        .user-icon {
-            background-color: var(--light-primary);
-        }
-        
-        /* أيقونة الـ AI (أخضر أو لون مميز) */
-        .ai-icon {
-            background-color: #059669; /* Emerald-600 */
-        }
-        
-        /* تنسيق النص داخل الرسالة */
-        .message-content {
-            flex-grow: 1;
+            font-family: 'Cairo', sans-serif;
+            background-color: #f7f9fc;
             line-height: 1.6;
-            padding-top: 0.25rem; /* لمحاذاة النص مع الأيقونة */
+        }
+        /* تلوين الخلفية والظلال للمنطقة الرئيسية */
+        .ai-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f2f5 100%);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* تصميم زر الإرسال */
+        #submit-btn {
+            transition: all 0.2s ease;
+            /* اللون الأساسي تم تحديثه ليتناسب مع زر الأيقونة */
+            background-color: #10b981; /* زمردي */
+        }
+        #submit-btn:hover {
+            background-color: #059669; /* زمردي أغمق */
+        }
+        #submit-btn:disabled {
+            background-color: #d1d5db;
+            cursor: not-allowed;
         }
         
-        /* -------------------------------------------
-           مؤشر الكتابة النظيف (Typing Indicator) 
-           ------------------------------------------- */
-        
-        .typing-dots .dot {
-            background-color: var(--light-primary); /* نقاط زرقاء نظيفة */
+        /* دوران مؤشر التحميل */
+        .spinner {
+            border-top-color: #ffffff;
+            -webkit-animation: spin 1s ease-in-out infinite;
+            animation: spin 1s ease-in-out infinite;
         }
-        
-        /* تلوين مؤشر التحميل */
-        .loading-color {
-            color: #059669; /* لون أخضر نظيف */
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
         }
-        .loading-color svg {
-            color: #059669;
-        }
-        
-        /* تعديل تصميم الرأس ليتناسب مع الثيم الفاتح */
-        header {
-            background-color: var(--light-container);
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        /* تعديل منطقة الإدخال لثيم فاتح */
-        .input-area {
-            background-color: var(--light-bg);
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        /* جعل نافذة الدردشة تستخدم خلفية فاتحة */
-        #chat-window {
-             background-color: var(--light-container);
-        }
-        
-        /* تعديل الترتيب في شاشات الجوال */
-        @media (max-width: 768px) {
-            .message-bubble {
-                padding: 0 0.5rem;
-            }
-            .role-icon {
-                margin-inline-end: 0.5rem;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* تنسيق نقاط التحميل المتحركة */
-        .typing-dots {
-            display: flex;
-            align-items: center;
-        }
-
-        .typing-dots .dot {
-            width: 8px;
-            height: 8px;
-            margin: 0 4px;
-            background-color: var(--light-primary);
-            border-radius: 50%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .typing-dots .dot-1 {
-            animation-delay: -0.32s;
-        }
-
-        .typing-dots .dot-2 {
-            animation-delay: -0.16s;
-        }
-
-        @keyframes bounce {
-            0%, 80%, 100% {
-                transform: scale(0);
-            } 
-            40% {
-                transform: scale(1.0);
-            }
-        }
+        /* تنسيق markdown داخل فقاعات الـ AI */
+        .ai-bubble-content h1 { font-size: 1.875rem; font-weight: 700; margin-bottom: 1rem; border-bottom: 2px solid #10b981; padding-bottom: 0.5rem; }
+        .ai-bubble-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #059669; }
+        .ai-bubble-content p { margin-bottom: 1rem; }
+        .ai-bubble-content ul, .ai-bubble-content ol { margin-bottom: 1rem; padding-right: 20px; }
+        .ai-bubble-content li { margin-bottom: 0.5rem; }
+        .ai-bubble-content code { background-color: #e5e7eb; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+        .ai-bubble-content pre { background-color: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1rem; }
+        .ai-bubble-content blockquote { border-right: 4px solid #10b981; padding-right: 1rem; margin-right: 1rem; color: #4b5563; font-style: italic; }
         
+        /* تعديل خاص بمنطقة الإدخال لتبدو أكثر إحكاماً وكمربع محادثة */
+        #prompt-input {
+            min-height: 56px; /* ارتفاع أدنى لتبدو كصف واحد */
+            max-height: 200px; /* تحديد أقصى ارتفاع */
+            overflow-y: hidden; /* إخفاء شريط التمرير الأصلي */
+            resize: none; /* منع تغيير حجمها يدوياً */
+        }
+
+        /* ******* ستايل خاص بتوقيع "هرياسور" ******* */
+        .hriasour-signature {
+            font-size: 1.8rem; /* حجم خط مناسب */
+            font-weight: 800; /* خط سميك جداً */
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            /* نص متدرج الألوان */
+            background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text; /* يجعل الخلفية تظهر كنص */
+            -webkit-text-fill-color: transparent; /* يجعل النص شفافاً لتظهر الخلفية */
+            background-size: 200% auto; /* حجم الخلفية أكبر للسماح بالحركة */
+            animation: gradient-animation 5s ease infinite; /* حركة التدرج */
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
     </style>
 </head>
-<body>
+<body class="p-4 sm:p-8 min-h-screen flex items-center justify-center">
 
-    <!-- حاوية التطبيق الرئيسية --><div id="app" class="flex flex-col w-full max-w-2xl h-[90vh] rounded-xl overflow-hidden md:h-[85vh]">
-
-        <!-- الرأس - شريط العنوان --><header class="p-4 shadow-sm">
-            <!-- تحديث اسم الذكاء الاصطناعي إلى Rsbalo-رسبالو ai --><h1 class="text-xl font-extrabold text-center header-text-shadow">Rsbalo-رسبالو ai</h1>
+    <div class="ai-container w-full max-w-4xl p-6 sm:p-10 rounded-xl shadow-2xl">
+        <header class="text-center mb-6">
+            <h1 class="4xl sm:text-5xl font-extrabold text-gray-900 mb-1 leading-tight">
+                <span class="text-teal-600">ريسبالو</span> AI
+            </h1>
+            <p class="text-lg text-gray-600">واجهة المحادثة التفاعلية مع مدرسك الخاص.</p>
         </header>
 
-        <!-- نافذة الدردشة - شاشة العرض الرئيسية --><div id="chat-window" class="flex-grow overflow-y-auto space-y-0">
-            <!-- رسالة ترحيبية أولية -->
-            <div class="message-row ai-message-row">
-                <div class="message-bubble">
-                     <div class="role-icon ai-icon">AI</div>
-                     <div class="message-content">
-                         <!-- تحديث الاسم في رسالة الترحيب -->
-                         <p class="mt-1">أهلاً بك! أنا **Rsbalo-رسبالو ai**، يمكنك الآن **الدردشة**، أو استخدام قائمة **الأدوات المتقدمة** لاختيار **التلخيص** أو **إنشاء الاختبار**.</p>
-                         <div class="mt-3 pt-3 border-t border-gray-300">
-                             <button id="tts-play-button" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-1 px-3 rounded-lg transition duration-200 shadow-md flex items-center rtl:flex-row-reverse" disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-2 rtl:mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636A9 9 0 0112 2.25C6.901 2.25 2.65 6.004 2.222 11.02a.75.75 0 00.776.985A14.914 14.914 0 0012 14.25c2.404 0 4.707-.66 6.745-1.898a.75.75 0 00.569-.643c.125-.972.338-1.928.6-2.862.333-1.168.514-2.333.514-3.513zm-9.011 3.228a.75.75 0 00-1.06 1.06L10.94 13.5l-2.887 2.887a.75.75 0 101.06 1.06L12 14.56l2.887 2.887a.75.75 0 101.06-1.06L13.06 13.5l2.887-2.887a.75.75 0 10-1.06-1.06L12 12.44l-2.887-2.887z" />
-                                </svg>
-                                <span class="font-medium">النطق الصوتي</span>
-                             </button>
-                         </div>
-                     </div>
-                </div>
-            </div>
-            <!-- سيتم إضافة رسائل الدردشة هنا بواسطة JavaScript -->
-        </div>
-
-        <!-- منطقة الإدخال والتحميل - وحدة التحكم --><div class="p-4 input-area">
-            <div id="loading-indicator" class="text-center mb-2 loading-color font-medium hidden">
-                <div class="flex items-center justify-center space-x-2">
-                    <svg class="animate-spin h-5 w-5 loading-color" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span id="loading-text" class="mr-2">جاري تحليل البيانات...</span>
-                </div>
-            </div>
-
-            <!-- منطقة الإدخال الموحدة مع زر الإرسال وزر الأدوات المطور --><div id="unified-input" class="flex space-x-2 rtl:space-x-reverse items-end">
-                <!-- حقل الإدخال المشترك --><textarea id="user-input" rows="1" placeholder="اكتب سؤالك الدراسي، أو الصق نصاً لاستخدام الأدوات المتقدمة..." class="flex-grow p-3 rounded-xl focus:outline-none transition duration-150 high-glow"></textarea>
-                
-                <!-- زر الأدوات المطور --><div id="tools-dropdown-container" class="relative flex-shrink-0">
-                    <!-- الزر الرئيسي لفتح القائمة --><button id="tools-toggle-button" class="p-3 w-16 md:w-24 rounded-xl transition duration-150 flex flex-col md:flex-row items-center justify-center disabled:opacity-50 high-glow" title="أدوات المعالجة المتقدمة">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12a.75.75 0 110-1.5.75.75 0 010 1.5zM12 17.25a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-                        </svg>
-                        <span class="text-xs md:text-base md:mr-2 mt-1 md:mt-0">أدوات</span>
-                    </button>
-
-                    <!-- قائمة الخيارات (مخفية افتراضياً) --><div id="tools-menu" class="absolute bottom-full mb-2 right-0 bg-white shadow-xl rounded-xl z-10 w-48 hidden border border-gray-200">
-                        <button id="summarize-option" class="w-full text-right p-3 hover:bg-gray-100 rounded-t-xl transition duration-100 flex items-center rtl:flex-row-reverse rtl:justify-end">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 rtl:mr-2 text-blue-600">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75M16.5 6h-6m4.5 4.5V18" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6h-.008v.008H3.75V6zm0 3h-.008v.008H3.75V9zm0 3h-.008v.008H3.75V12zm0 3h-.008v.008H3.75V15z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-medium">تلخيص النص</span>
-                        </button>
-                        <button id="quiz-option" class="w-full text-right p-3 hover:bg-gray-100 rounded-b-xl transition duration-100 flex items-center rtl:flex-row-reverse rtl:justify-end">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-2 rtl:mr-2 text-green-600">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5l-1.5 6m0 0l-1.5 6m1.5-6h1.5" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-medium">إنشاء أسئلة اختبار</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- زر الإرسال للدردشة --><button id="send-button" class="p-3 rounded-xl transition duration-150 flex items-center justify-center disabled:opacity-50 flex-shrink-0 high-glow" title="إرسال الأمر للدردشة">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 transform rotate-180">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A5.996 5.996 0 0115.536 17.5l4.331 4.331a1.5 1.5 0 002.121-2.121l-4.331-4.331A5.996 5.996 0 013.269 6.269L6 12z" />
-                    </svg>
-                    <span class="mr-2 hidden md:inline">إرسال</span>
+        <!-- ******* منطقة إدخال مفتاح الـ API (NEW) ******* -->
+        <div id="api-key-setup" class="bg-yellow-50 p-4 rounded-lg border border-yellow-300 shadow-md mb-6">
+            <h2 class="text-xl font-bold text-yellow-800 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v5a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h6zM12 18h.01"></path></svg>
+                ضبط مفتاح API (مهم)
+            </h2>
+            <p class="text-sm text-yellow-700 mb-3">
+                يا صاحبي، لازم تحط مفتاح Gemini API بتاعك هنا عشان نقدر نشتغل. متقلقش، المفتاح ده بيقعد معاك بس في الجلسة دي ومش بيتحفظ في الكود.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="password" id="api-key-input" placeholder="ألصق مفتاح Gemini API هنا..." class="flex-grow p-3 text-gray-800 border-2 border-yellow-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition duration-150" />
+                <button id="set-api-key-btn" class="sm:w-auto px-6 py-3 text-white font-semibold rounded-lg bg-yellow-600 hover:bg-yellow-700 transition duration-150">
+                    تفعيل المحادثة
                 </button>
             </div>
+            <p id="key-status" class="mt-2 text-sm font-semibold text-red-600">الرجاء إدخال المفتاح لتفعيل المحادثة.</p>
+        </div>
+        <!-- نهاية منطقة إدخال مفتاح الـ API -->
+
+        <!-- منطقة المحادثة (Chat History) --><div class="bg-white p-6 rounded-lg border-2 border-gray-200 shadow-xl mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">سجل المحادثة:</h2>
+            <!-- نافذة الدردشة القابلة للتمرير --><div id="chat-history" class="h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg space-y-6">
+                <!-- الرسائل (بما في ذلك الرسالة الترحيبية) ستظهر هنا بواسطة JavaScript --></div>
+        </div>
+
+        <!-- ******* منطقة الإدخال المحدثة والمدمجة (NEW MODERN UI) ******* -->
+        <div class="relative mb-4">
+            <textarea id="prompt-input" 
+                      rows="1" 
+                      class="w-full p-4 pl-16 text-gray-800 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-teal-500 focus:border-teal-500 transition duration-150 shadow-2xl" 
+                      placeholder="اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا..." 
+                      disabled 
+                      oninput="autoResizeTextarea()"></textarea>
             
-            <!-- إضافة عبارة "من تطوير هرياسور" --><div class="text-center text-sm text-gray-500 mt-2">من تطوير هرياسور</div>
-            
+            <!-- زر الإرسال داخل الحقل (سهم صاعد) -->
+            <button id="submit-btn" 
+                    class="absolute bottom-3 left-3 w-10 h-10 flex items-center justify-center text-white rounded-full bg-teal-600 hover:bg-teal-700 transition duration-200 shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                    onclick="processPrompt()" 
+                    disabled>
+                <!-- أيقونة السهم الصاعد (الإرسال) -->
+                <svg id="send-icon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+                <div id="loading-spinner" class="spinner h-5 w-5 border-4 border-gray-200 rounded-full hidden absolute" role="status"></div>
+            </button>
+        </div>
+        <!-- نهاية منطقة الإدخال المحدثة -->
+        
+        <!-- رسالة الخطأ --><div id="error-message" class="mt-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded-lg hidden" role="alert">
+            <!-- رسالة الخطأ ستظهر هنا --></div>
+
+        <!-- ******* توقيع "هرياسور" الفخم ******* --><div class="hriasour-signature">
+            من صنع هرياسور
         </div>
 
     </div>
 
-    <script type="module">
-        // ------------------------------------------------
-        // إعدادات وبيانات الـ API 
-        // ------------------------------------------------
-
-        // مفتاح الـ API
-        const apiKey = "AIzaSyAgZ6GNzAdxBIpVae-SM1QsjH5fK_ixjn0"; 
+    <script>
+        // إعدادات API
+        const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
         
-        // **********************************************
-        // التصحيح المهم لنموذج الدردشة: gemini-2.5-flash-preview-09-2025
-        // **********************************************
-        const chatModelName = 'gemini-2.5-flash-preview-09-2025'; 
-        const chatApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${chatModelName}:generateContent?key=${apiKey}`;
+        // العناصر الرئيسية في DOM
+        const promptInput = document.getElementById('prompt-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorMessage = document.getElementById('error-message');
         
-        // API للنطق الصوتي (Text-to-Speech)
-        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-        
-        // تاريخ المحادثة
-        let chatHistory = [];
-        // حالة التحميل
-        let isLoading = false;
-        // لتخزين كائن الصوت الحالي (مهم لوظيفة النطق)
-        let audio = null; 
-        
+        // عناصر مفتاح API الجديدة
+        const apiKeyInput = document.getElementById('api-key-input');
+        const setApiKeyBtn = document.getElementById('set-api-key-btn');
+        const keyStatus = document.getElementById('key-status');
+        const apiKeySetupDiv = document.getElementById('api-key-setup');
+        const sendIcon = document.getElementById('send-icon'); // الأيقونة الجديدة
 
-        // ------------------------------------------------
-        // عناصر DOM
-        // ------------------------------------------------
+        // متغير لحفظ المفتاح المدخل من المستخدم
+        let API_KEY_USER = "";
+        let API_URL = "";
 
-        const chatWindow = document.getElementById('chat-window');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        
-        // العناصر الجديدة لزر الأدوات المطور
-        const toolsToggleButton = document.getElementById('tools-toggle-button');
-        const toolsMenu = document.getElementById('tools-menu');
-        const summarizeOption = document.getElementById('summarize-option');
-        const quizOption = document.getElementById('quiz-option'); 
-        
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const loadingText = document.getElementById('loading-text');
-
-        // ------------------------------------------------
-        // وظائف الواجهة الرسومية (UI)
-        // ------------------------------------------------
-        
-        /**
-         * إنشاء وإظهار مؤشر الكتابة (النقاط المتحركة).
-         */
-        function showTypingIndicator() {
-            // التحقق لتجنب إضافة المؤشر إذا كان موجوداً بالفعل
-            if (document.getElementById('typing-indicator-container')) return;
-
-            // 1. إنشاء حاوية المؤشر
-            const indicatorContainer = document.createElement('div');
-            indicatorContainer.id = 'typing-indicator-container'; // ID فريد لسهولة الإزالة
-            indicatorContainer.className = 'message-row ai-message-row';
-
-            const indicatorBubble = document.createElement('div');
-            indicatorBubble.className = 'message-bubble';
-
-            // 2. محتوى المؤشر (الأيقونة والنقاط المتحركة)
-            indicatorBubble.innerHTML = `
-                <div class="role-icon ai-icon">AI</div>
-                <div class="message-content typing-dots flex items-center space-x-2 rtl:space-x-reverse">
-                    <!-- تحديث الاسم في مؤشر الكتابة -->
-                    <span class="font-semibold text-sm mr-2">Rsbalo-رسبالو يفكر...</span>
-                    <span class="dot dot-1"></span>
-                    <span class="dot dot-2"></span>
-                    <span class="dot dot-3"></span>
-                </div>
-            `;
-
-            indicatorContainer.appendChild(indicatorBubble);
-            chatWindow.appendChild(indicatorContainer);
-            // التمرير التلقائي لأسفل النافذة
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
+        // ******* تم تعديل موجه النظام ليكون ودوداً، دمه خفيف، ويتحدث بالعامية فقط *******
+        const systemPrompt = "يا صاحبي، أنت دلوقتي 'ريسبالو AI'، مدرسك الجامد اللي مالوش مثيل! شخصيتك مرحة ودمك خفيف جداً (funny/lighthearted)، ودائماً بتبتسم وبتستخدم إيموجي. الشرح بتاعك لازم يكون 'بالبلدي' وبطريقة حوارية سهلة وممتعة، وممنوع منعاً باتاً تستخدم أي لغة عربية فصحى قديمة أو معقدة (زي اللي فيها تشكيل أو مصطلحات غريبة). لازم تكون دقيق جداً في تنفيذ طلبات المستخدم وإتقان أي لهجة بيطلبها منك (زي المصرية الأصيلة 100%). لو في معلومة مهمة أو نقطة خطر، نبهه عليها فوراً بأسلوب جذاب. تذكر دايماً إنك أحسن من أي مدرس تقليدي بمليار تريليون مرة! استخدم خاصية البحث للوصول لأحدث المعلومات، ونسّق إجابتك بـ Markdown كويس.";
 
         /**
-         * إزالة مؤشر الكتابة.
+         * تحديث واجهة المستخدم (UI) لتمكين أو تعطيل المحادثة.
+         * @param {boolean} isEnabled - True للتمكين، False للتعطيل.
          */
-        function hideTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator-container');
-            if (indicator) {
-                indicator.remove();
+        function updateChatUI(isEnabled) {
+            promptInput.disabled = !isEnabled;
+            submitBtn.disabled = !isEnabled;
+            if (isEnabled) {
+                promptInput.placeholder = 'اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا... (اضغط Enter للإرسال)';
+                apiKeySetupDiv.classList.add('hidden'); // إخفاء مربع إدخال المفتاح
+            } else {
+                promptInput.placeholder = 'يرجى إدخال مفتاح API أولاً لتفعيل المحادثة.';
             }
         }
 
+        /**
+         * دالة لتكبير حقل الإدخال تلقائياً حتى حد أقصى.
+         */
+        function autoResizeTextarea() {
+            promptInput.style.height = 'auto'; // إعادة تعيين الارتفاع مؤقتاً
+            // الارتفاع المطلوب (مع الأخذ في الاعتبار min-height و max-height في CSS)
+            const scrollHeight = promptInput.scrollHeight;
+            
+            // تطبيق الارتفاع الجديد (مع حد أقصى 200px)
+            const newHeight = Math.min(scrollHeight, 200);
+            promptInput.style.height = `${newHeight}px`;
+            
+            // للتأكد من أن الزر يظل في مكانه الصحيح (أسفل الـ textarea)
+            const button = document.getElementById('submit-btn');
+            const newBottom = 12; // 12px padding + 12px margin = ~24px total bottom
+            button.style.bottom = `${newBottom}px`; 
+        }
+        
+        /**
+         * إضافة رسالة ترحيبية بعد تفعيل مفتاح API.
+         */
+        function appendWelcomeMessage() {
+            // التحقق من عدم وجود رسائل سابقة لتجنب التكرار
+            if (document.getElementById('chat-history').children.length === 0) {
+                const welcomeText = 'يا هلا بيك يا صاحبي! 😉 أنا ريسبالو AI، مدرسك الخاص اللي دمه خفيف وبشرحلك بالبلدي. أسألني أي سؤال في دماغك، وهتلاقيني بجاوبك بإتقان وبشكل يضحك! إزاي أقدر أساعدك دلوقتي؟';
+                appendMessage('ai', welcomeText);
+            }
+        }
 
         /**
-         * تحديث واجهة المحادثة بإضافة رسالة جديدة.
-         * @param {string} role - دور المرسل ('user' أو 'model').
+         * معالجة إدخال وتخزين مفتاح API.
+         */
+        function setApiKey() {
+            const key = apiKeyInput.value.trim();
+            // تحقق بسيط من طول المفتاح
+            if (key.length > 20) { 
+                API_KEY_USER = key;
+                API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY_USER}`;
+                
+                keyStatus.textContent = 'تم التفعيل بنجاح! يلا بينا نشتغل! 🥳';
+                keyStatus.classList.remove('text-red-600');
+                keyStatus.classList.add('text-green-600');
+                
+                updateChatUI(true); // تفعيل واجهة المحادثة
+                appendWelcomeMessage(); // عرض رسالة الترحيب
+            } else {
+                keyStatus.textContent = 'المفتاح شكله قصير أو مش صحيح. يرجى التأكد من لصق مفتاح Gemini API بالكامل.';
+                keyStatus.classList.remove('text-green-600');
+                keyStatus.classList.add('text-red-600');
+                updateChatUI(false); // تعطيل واجهة المحادثة
+            }
+        }
+
+        // حدث الضغط على زر التفعيل
+        setApiKeyBtn.addEventListener('click', setApiKey);
+        
+        // حدث الضغط على Enter في حقل المفتاح لتفعيل أسرع
+        apiKeyInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                setApiKey();
+            }
+        });
+
+        /**
+         * إنشاء فقاعة رسالة وإضافتها لسجل المحادثة.
+         * يتم دمج منطق عرض المصادر داخل هذه الوظيفة.
+         * @param {string} sender - نوع المرسل ('user' أو 'ai').
          * @param {string} text - نص الرسالة.
-         * @param {string} type - نوع الرسالة (chat, summary_request, summary_response, quiz_response).
+         * @param {Array} sources - قائمة المصادر (لرسائل AI فقط).
          */
-        function addMessageToUI(role, text, type = 'chat') {
-            const isUser = role === 'user' || type === 'summary_request' || type === 'quiz_request';
+        function appendMessage(sender, text, sources = []) {
+            const chatHistory = document.getElementById('chat-history');
+            const isUser = sender === 'user';
             
-            // تحديد فئة الصف بناءً على المرسل
-            const messageRow = document.createElement('div');
-            messageRow.className = `message-row ${isUser ? 'user-message-row' : 'ai-message-row'}`;
+            // Message container: يحدد مكان الفقاعة في RTL. (justify-end للمستخدم، justify-start للـ AI)
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `flex ${isUser ? 'justify-end' : 'justify-start'} max-w-full`;
+            
+            // Wrapper for icon and bubble
+            const bubbleWrapper = document.createElement('div');
+            bubbleWrapper.className = 'flex items-end max-w-full';
 
-            // تحديد المحتوى الداخلي للرسالة
-            const messageBubble = document.createElement('div');
-            messageBubble.className = 'message-bubble';
-            
-            // بناء الأيقونة
-            const roleIcon = document.createElement('div');
-            roleIcon.className = `role-icon ${isUser ? 'user-icon' : 'ai-icon'}`;
-            
-            let iconText;
-            let roleLabelText;
+            // User Icon (على اليمين)
             if (isUser) {
-                iconText = 'أنا';
-                roleLabelText = (type === 'summary_request' || type === 'quiz_request') ? 'النص المُدخل (للمعالجة)' : 'أنا';
-            } else {
-                iconText = 'AI';
-                // تحديث الاسم في فقاعات الدردشة غير-الدردشة (مثل الملخص والاختبار)
-                roleLabelText = type === 'summary_response' ? 'ملخص AI' : (type === 'quiz_response' ? 'اختبار AI' : 'Rsbalo-رسبالو');
-            }
-            roleIcon.textContent = iconText;
-            
-            // بناء المحتوى (النص الفعلي)
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            
-            // إضافة التسمية 
-            if (type !== 'chat') {
-                 const roleLabel = document.createElement('p');
-                 roleLabel.className = 'font-semibold text-sm mb-1'; 
-                 roleLabel.textContent = roleLabelText;
-                 messageContent.appendChild(roleLabel);
-            }
-
-
-            const messageText = document.createElement('p');
-            // استخدام pre-wrap للحفاظ على تنسيق الأسطر الجديدة والعلامات (مثل قائمة الاختبار)
-            messageText.className = 'whitespace-pre-wrap'; 
-            messageText.textContent = text;
-            
-            // معالجة علامات Markdown البسيطة لعرض أفضل (الخط الغليظ والقوائم)
-            // (هذا تبسيط لمعالجة Markdown، يمكنك استخدام مكتبة إذا احتجت إلى دعم كامل)
-            messageText.innerHTML = text
-                                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
-                                        .replace(/^- (.*)/gm, '<li>$1</li>'); // List items (if needed)
-
-            // إذا كان الرد اختباراً، نلفه في قائمة لترتيب أفضل
-            if (type === 'quiz_response') {
-                // قد يحتوي نص الاختبار على أسطر متعددة، لذا نستخدم HTML بدلاً من innerText
-                messageContent.innerHTML = `<p class="font-semibold text-sm mb-1">${roleLabelText}</p>`;
-                
-                // إضافة النص نفسه (مع افتراض أن LLM سيولد Markdown)
-                const quizTextContainer = document.createElement('div');
-                quizTextContainer.className = 'p-3 bg-white border border-gray-200 rounded-lg shadow-sm';
-                quizTextContainer.innerHTML = text.replace(/```markdown|```/g, ''); // إزالة كود بلوك Markdown
-
-                messageContent.appendChild(quizTextContainer);
-            } else {
-                 messageContent.appendChild(messageText);
-            }
-
-
-            // تجميع الأجزاء
-            messageBubble.appendChild(roleIcon);
-            messageBubble.appendChild(messageContent);
-            messageRow.appendChild(messageBubble);
-
-            // ------------------------------------
-            // إضافة زر النطق الصوتي (TTS) لرسائل AI
-            // ------------------------------------
-            if (!isUser && text.length > 5 && type === 'chat') {
-                const ttsButtonContainer = document.createElement('div');
-                ttsButtonContainer.className = 'mt-3 pt-3 border-t border-gray-300';
-                
-                const ttsButton = document.createElement('button');
-                // ID ثابت لزر النطق، يتم إعادة تعيينه في كل رسالة AI جديدة 
-                ttsButton.id = 'tts-play-button'; 
-                ttsButton.className = 'bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-1 px-3 rounded-lg transition duration-200 shadow-md flex items-center rtl:flex-row-reverse disabled:opacity-50';
-                // إزالة النجمة من زر النطق في الرسائل
-                ttsButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-2 rtl:mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636A9 9 0 0112 2.25C6.901 2.25 2.65 6.004 2.222 11.02a.75.75 0 00.776.985A14.914 14.914 0 0012 14.25c2.404 0 4.707-.66 6.745-1.898a.75.75 0 00.569-.643c.125-.972.338-1.928.6-2.862.333-1.168.514-2.333.514-3.513zm-9.011 3.228a.75.75 0 00-1.06 1.06L10.94 13.5l-2.887 2.887a.75.75 0 101.06 1.06L12 14.56l2.887 2.887a.75.75 0 101.06-1.06L13.06 13.5l2.887-2.887a.75.75 0 10-1.06-1.06L12 12.44l-2.887-2.887z" />
-                    </svg>
-                    <span class="font-medium">النطق الصوتي</span>
+                const userIcon = document.createElement('div');
+                userIcon.className = 'flex-shrink-0 mr-2';
+                userIcon.innerHTML = `
+                    <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
                 `;
+                bubbleWrapper.appendChild(userIcon);
+            }
+
+            const bubble = document.createElement('div');
+            // تصميم الفقاعة: أزرق للمستخدم (rounded-bl-none)، أبيض/زمردي للـ AI (rounded-br-none)
+            bubble.className = `p-4 rounded-xl shadow-lg transition-all duration-300 max-w-full sm:max-w-[75%] ${
+                isUser
+                    ? 'bg-blue-600 text-white rounded-bl-none ml-auto'
+                    : 'bg-white text-gray-800 rounded-br-none mr-auto border border-gray-100'
+            }`;
+            
+            // منطقة المحتوى لتطبيق تنسيقات Markdown
+            const content = document.createElement('div');
+            // AI messages need the specific class for markdown styling defined in <style>
+            content.className = `${isUser ? '' : 'ai-bubble-content'} whitespace-pre-wrap leading-relaxed text-right`;
+            content.innerHTML = text; 
+            bubble.appendChild(content);
+
+            // المصادر (لـ AI فقط)
+            if (!isUser && sources.length > 0) {
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500';
+                sourcesDiv.innerHTML = '<h4 class="font-semibold mb-1 text-gray-600">المصادر المرجعية (مُعتمدة على البحث):</h4>';
                 
-                // ربط الزر بدالة النطق
-                ttsButton.addEventListener('click', () => {
-                    // تعطيل الزر مؤقتاً أثناء التحميل/التشغيل
-                    const allTtsButtons = document.querySelectorAll('#tts-play-button');
-                    allTtsButtons.forEach(btn => btn.disabled = true);
-                    readMessageAloud(text, ttsButton);
+                sources.filter(attr => attr.web?.uri && attr.web?.title).forEach((attr, index) => {
+                    const sourceLink = document.createElement('a');
+                    sourceLink.href = attr.web.uri;
+                    sourceLink.target = "_blank";
+                    sourceLink.className = "source-item block hover:text-teal-600 hover:underline truncate";
+                    sourceLink.textContent = `(${index + 1}) ${attr.web.title}`;
+                    sourcesDiv.appendChild(sourceLink);
                 });
-
-                ttsButtonContainer.appendChild(ttsButton);
-                messageContent.appendChild(ttsButtonContainer);
-                
-                // تفعيل الزر بعد إضافته في حال عدم وجود تحميل عام
-                if (!isLoading) {
-                    ttsButton.disabled = false;
-                }
+                bubble.appendChild(sourcesDiv);
             }
-            // ------------------------------------
+            
+            bubbleWrapper.appendChild(bubble);
 
-            chatWindow.appendChild(messageRow);
-            // التمرير التلقائي لأسفل النافذة
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            // AI Icon (على اليسار)
+            if (!isUser) {
+                const aiIcon = document.createElement('div');
+                aiIcon.className = 'flex-shrink-0 ml-2';
+                aiIcon.innerHTML = `
+                    <div class="h-8 w-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        AI
+                    </div>
+                `;
+                bubbleWrapper.appendChild(aiIcon);
+            }
+
+            messageContainer.appendChild(bubbleWrapper);
+            chatHistory.appendChild(messageContainer);
+            
+            // التمرير إلى أسفل سجل المحادثة
+            chatHistory.scrollTop = chatHistory.scrollHeight;
         }
 
         /**
-         * تحديث حالة التحميل (الأزرار ومؤشر التحميل).
-         * @param {boolean} loading - القيمة الجديدة لحالة التحميل.
-         * @param {string} currentAction - النص الذي سيظهر في مؤشر التحميل.
+         * إدارة حالة واجهة المستخدم أثناء التحميل.
+         * تم التعديل لإدارة الأيقونة والسبينر فقط.
+         * @param {boolean} isLoading - True للتحميل، False للانتهاء.
          */
-        function setLoading(loading, currentAction = 'جاري تحليل البيانات...') {
-            isLoading = loading;
-            
-            // تعطيل كافة حقول وأزرار الإدخال
-            userInput.disabled = loading;
-            sendButton.disabled = loading;
-            toolsToggleButton.disabled = loading; 
-            
-            // تعطيل/تفعيل جميع أزرار TTS بشكل جماعي
-            document.querySelectorAll('#tts-play-button').forEach(btn => btn.disabled = loading);
-
-
-            loadingIndicator.classList.toggle('hidden', !loading);
-            loadingText.textContent = currentAction;
-        }
-        
-        /**
-         * تحديث حجم حقل الإدخال ليتناسب مع المحتوى (لتحسين تجربة لصق النصوص الطويلة).
-         */
-        function resizeInput() {
-            // إعادة تعيين rows إلى 1 لحساب الطول الجديد بشكل صحيح
-            userInput.style.height = 'auto';
-            userInput.rows = 1; 
-
-            // حساب الارتفاع المطلوب وتطبيقه
-            let scrollHeight = userInput.scrollHeight;
-            let maxHeight = 150; // حد أقصى للارتفاع بالبكسل
-
-            if (scrollHeight > maxHeight) {
-                userInput.style.height = maxHeight + 'px';
+        function setLoadingState(isLoading) {
+            submitBtn.disabled = isLoading;
+            promptInput.disabled = isLoading;
+            if (isLoading) {
+                sendIcon.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
             } else {
-                userInput.style.height = scrollHeight + 'px';
+                sendIcon.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
             }
-        }
-        
-        // ربط دالة تغيير الحجم بحدث الإدخال
-        userInput.addEventListener('input', resizeInput);
-        
-        // ------------------------------------------------
-        // وظيفة الاتصال بـ API مع آلية التراجع الأسي (Exponential Backoff)
-        // ------------------------------------------------
-
-        async function exponentialBackoffFetch(url, options, maxRetries = 5) {
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) {
-                        return response;
-                    }
-                    // Handle rate limiting (429) and server errors (5xx)
-                    if (response.status === 429 || response.status >= 500) {
-                        throw new Error(`Server or rate limit error: ${response.status}`);
-                    }
-                    return response;
-                } catch (error) {
-                    console.error(`Attempt ${i + 1} failed:`, error);
-                    if (i === maxRetries - 1) {
-                        throw new Error('API request failed after multiple retries.');
-                    }
-                    const delay = Math.pow(2, i) * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
-        }
-        
-        // ------------------------------------------------
-        // وظائف مساعدة لـ TTS (تحويل PCM إلى WAV)
-        // ------------------------------------------------
-
-        /**
-         * تحويل Base64 إلى ArrayBuffer.
-         */
-        function base64ToArrayBuffer(base64) {
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
         }
 
         /**
-         * تحويل بيانات PCM 16-bit إلى Blob بتنسيق WAV.
-         * @param {Int16Array} pcm16 - بيانات الصوت بصيغة PCM 16-bit.
-         * @param {number} sampleRate - معدل أخذ العينات.
-         * @returns {Blob} ملف WAV كـ Blob.
+         * دالة معالجة الإدخال وإرسال الاستعلام لـ Gemini.
+         * وتتضمن آلية للتأخير الأسي (Exponential Backoff) لإعادة المحاولة.
          */
-        function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1;
-            const bytesPerSample = 2; // 16-bit PCM
-
-            const buffer = new ArrayBuffer(44 + pcm16.length * bytesPerSample);
-            const view = new DataView(buffer);
-
-            // وظيفة لكتابة السلاسل (Strings)
-            function writeString(view, offset, string) {
-                for (let i = 0; i < string.length; i++) {
-                    view.setUint8(offset + i, string.charCodeAt(i));
-                }
+        async function processPrompt() {
+            // التحقق أولاً من وجود مفتاح API
+            if (!API_KEY_USER) {
+                errorMessage.textContent = 'يا صاحبي، لازم تحط مفتاح API الأول عشان نعرف نشتغل! 🛑';
+                errorMessage.classList.remove('hidden');
+                return;
             }
 
-            // RIFF chunk descriptor
-            writeString(view, 0, 'RIFF'); // ChunkID
-            view.setUint32(4, 36 + pcm16.length * bytesPerSample, true); // ChunkSize
-            writeString(view, 8, 'WAVE'); // Format
-
-            // FMT sub-chunk
-            writeString(view, 12, 'fmt '); // Subchunk1ID
-            view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
-            view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
-            view.setUint16(22, numChannels, true); // NumChannels
-            view.setUint32(24, sampleRate, true); // SampleRate
-            view.setUint32(28, sampleRate * numChannels * bytesPerSample, true); // ByteRate
-            view.setUint16(32, numChannels * bytesPerSample, true); // BlockAlign
-            view.setUint16(34, bytesPerSample * 8, true); // BitsPerSample
-
-            // DATA sub-chunk
-            writeString(view, 36, 'data'); // Subchunk2ID
-            view.setUint32(40, pcm16.length * bytesPerSample, true); // Subchunk2Size
-
-            // Write PCM data
-            for (let i = 0; i < pcm16.length; i++) {
-                view.setInt16(44 + i * bytesPerSample, pcm16[i], true);
+            const userQuery = promptInput.value.trim();
+            if (!userQuery) {
+                errorMessage.textContent = 'الرجاء إدخال سؤالك أو مهمتك أولاً.';
+                errorMessage.classList.remove('hidden');
+                return;
             }
 
-            return new Blob([view], { type: 'audio/wav' });
-        }
-
-
-        /**
-         * تشغيل النص الصوتي باستخدام TTS API.
-         * @param {string} text - النص المراد نطقه.
-         * @param {HTMLElement} playButton - زر التشغيل المحدد.
-         */
-        async function readMessageAloud(text, playButton) {
-             if (isLoading) return;
-
-             // إيقاف أي تشغيل سابق وتدميره
-             if (audio) {
-                 audio.pause();
-                 audio = null;
-             }
-             
-             // تفعيل حالة التحميل العامة
-             setLoading(true, 'Rsbalo-رسبالو يحول النص إلى صوت...');
-             playButton.innerHTML = 'جاري التحميل...'; // تحديث حالة الزر المحدد
-
-             const ttsPayload = {
-                contents: [{
-                    parts: [{ text: `قل بهدوء باللغة العربية: ${text}` }] // إضافة توجيه النطق
-                }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        // اختيار صوت عربي (Algieba صوت واضح ومناسب للنطق الأكاديمي)
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: "Algieba" } 
-                        }
-                    }
-                },
-                model: "gemini-2.5-flash-preview-tts"
-            };
-
-            const ttsOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(ttsPayload)
-            };
-
-            try {
-                const response = await exponentialBackoffFetch(ttsApiUrl, ttsOptions);
-                const result = await response.json();
-
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
-
-                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
-                    // استخراج معدل أخذ العينات من الـ MimeType: audio/L16;rate=24000
-                    const rateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
-                    
-                    const pcmData = base64ToArrayBuffer(audioData);
-                    const pcm16 = new Int16Array(pcmData);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-                    
-                    audio = new Audio(audioUrl);
-                    audio.play();
-
-                    playButton.innerHTML = '🔊 جاري النطق...';
-                    setLoading(false); // إيقاف مؤشر التحميل العام بمجرد بدء التشغيل
-
-                    // عند انتهاء التشغيل
-                    audio.onended = () => {
-                         playButton.innerHTML = 'النطق الصوتي';
-                         // إعادة تفعيل جميع أزرار TTS والتحكم
-                         setLoading(false);
-                         URL.revokeObjectURL(audioUrl); // تحرير الذاكرة
-                    };
-
-                    // عند حدوث خطأ في التشغيل
-                    audio.onerror = (e) => {
-                         console.error("Audio playback error:", e);
-                         playButton.innerHTML = '❌ خطأ تشغيل';
-                         // إعادة تفعيل جميع أزرار TTS والتحكم
-                         setLoading(false);
-                         URL.revokeObjectURL(audioUrl); 
-                    };
-
-
-                } else {
-                    addMessageToUI('model', 'عذراً، فشلت عملية توليد الصوت. يرجى المحاولة مرة أخرى.', 'chat');
-                }
-
-            } catch (error) {
-                console.error('Gemini TTS API Error:', error);
-                addMessageToUI('model', 'حدث خطأ في الشبكة أو الـ API لخدمة النطق الصوتي.', 'chat');
-            } finally {
-                // التأكد من إيقاف التحميل العام في حال فشل الاتصال
-                if (!audio || audio.ended || audio.error) {
-                    setLoading(false);
-                    playButton.innerHTML = 'النطق الصوتي';
-                }
-            }
-        }
-
-
-        // ------------------------------------------------
-        // وظيفة إرسال الرسالة إلى الذكاء الاصطناعي (وضع الدردشة)
-        // ------------------------------------------------
-
-        async function sendMessage() {
-            const userText = userInput.value.trim();
-            if (!userText || isLoading) return;
-
-            // 1. مسح وإظهار رسالة المستخدم
-            userInput.value = '';
-            resizeInput(); 
-            addMessageToUI('user', userText, 'chat');
+            // 1. إضافة رسالة المستخدم ومسح حقل الإدخال
+            appendMessage('user', userQuery);
+            promptInput.value = ''; 
+            // إعادة تعيين حجم الإدخال بعد الإرسال
+            promptInput.style.height = '56px'; // العودة للارتفاع الأدنى (بما يعادل min-height: 56px)
             
-            // 2. تفعيل حالة التحميل وإظهار مؤشر الكتابة
-            setLoading(true, 'Rsbalo-رسبالو يبحث...');
-            showTypingIndicator();
-
-            // إيقاف أي تشغيل صوتي سابق
-            if (audio) {
-                audio.pause();
-                audio = null;
-            }
-
-
-            // إضافة الرسالة لسجل الدردشة
-            const userMessage = { role: "user", parts: [{ text: userText }] };
-            chatHistory.push(userMessage);
-
-            const systemPrompt = "أنت صديق ورفيق ذكاء اصطناعي متطور جداً ومخصص لمساعدتك. مهمتك الأساسية هي أن تكون شخصية ودودة وداعمة، وأن تعمل كمعلم خاص يستطيع شرح جميع أنواع الدروس والمناهج الدراسية لجميع المراحل التعليمية (الابتدائية، المتوسطة، الثانوية، الجامعية) بأسلوب مبسط وممتع. استخدم دائماً لغة عربية فصيحة لكن بأسلوب قريب وودي، وتأكد من أن المعلومات دقيقة وحديثة.";
+            // 2. إضافة رسالة التحميل (Placeholder)
+            appendMessage('ai', 'جاري التفكير...', []);
+            
+            errorMessage.classList.add('hidden');
+            setLoadingState(true);
 
             const payload = {
-                contents: chatHistory,
+                contents: [{ parts: [{ text: userQuery }] }],
+                // تفعيل البحث باستخدام Google Search للحصول على معلومات حديثة وموثوقة
+                tools: [{ "google_search": {} }],
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
-                },
-                tools: [{ "google_search": {} }], 
-            };
-
-            const options = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            };
-
-            try {
-                const response = await exponentialBackoffFetch(chatApiUrl, options);
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0) {
-                    const candidate = result.candidates[0];
-                    const aiResponseText = candidate.content?.parts?.[0]?.text;
-
-                    if (aiResponseText) {
-                        addMessageToUI('model', aiResponseText, 'chat');
-                        const aiMessage = { role: "model", parts: [{ text: aiResponseText }] };
-                        chatHistory.push(aiMessage);
-                    } else {
-                        addMessageToUI('model', 'عذراً، لم أتمكن من توليد استجابة نصية.', 'chat');
-                        chatHistory.pop(); 
-                    }
-                } else {
-                    const errorMessage = result.error?.message || 'حدث خطأ غير معروف أثناء الاتصال بالذكاء الاصطناعي (الدردشة).';
-                    addMessageToUI('model', `حدث خطأ: ${errorMessage}`, 'chat');
-                    chatHistory.pop(); 
                 }
-
-            } catch (error) {
-                console.error('Gemini Chat API Error:', error);
-                addMessageToUI('model', `حدث خطأ في الشبكة أو الـ API للدردشة. (التفاصيل: ${error.message})`, 'chat');
-                chatHistory.pop(); 
-            } finally {
-                // 3. إخفاء مؤشر الكتابة وحالة التحميل
-                hideTypingIndicator();
-                setLoading(false);
-            }
-        }
-
-        // ------------------------------------------------
-        // وظيفة تلخيص النص
-        // ------------------------------------------------
-
-        async function summarizeText() {
-            const textToSummarize = userInput.value.trim();
-            
-            if (textToSummarize.length < 50 || isLoading) {
-                const errorMsg = textToSummarize.length < 50 ? 
-                                 'عذراً، يجب أن يكون النص المراد تلخيصه أطول من 50 حرفاً. يرجى لصق نص طويل.' :
-                                 'النظام مشغول حالياً، يرجى الانتظار.';
-                                 
-                addMessageToUI('model', errorMsg, 'summary_response');
-                return;
-            }
-
-            // 1. إضافة النص المدخل
-            addMessageToUI('user', textToSummarize, 'summary_request');
-            
-            // مسح حقل الإدخال وإعادة تعيين حجمه
-            userInput.value = '';
-            resizeInput();
-            
-            // 2. تفعيل حالة التحميل وإظهار مؤشر الكتابة
-            setLoading(true, 'Rsbalo-رسبالو يلخص...');
-            showTypingIndicator();
-
-
-            // إرسال طلب التلخيص كاستعلام جديد
-            const userQuery = `لخّص النص التالي في فقرة واحدة (ما لا يزيد عن 150 كلمة) وحافظ على الأسلوب الرسمي. النص: ${textToSummarize}`;
-            
-            const payload = {
-                // نرسل رسالة واحدة جديدة للتلخيص
-                contents: [{ role: "user", parts: [{ text: userQuery }] }],
-                systemInstruction: {
-                    parts: [{ text: "أنت خبير في التلخيص، ومهمتك هي استخراج أهم النقاط في أي نص يقدم إليك بدقة وإيجاز، مع الحفاظ على لغة النص الأصلية." }]
-                },
-                // لا نحتاج لأداة البحث في التلخيص
             };
 
-            const options = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            };
-
-            try {
-                const response = await exponentialBackoffFetch(chatApiUrl, options);
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0) {
-                    const aiResponseText = result.candidates[0].content?.parts?.[0]?.text;
-
-                    if (aiResponseText) {
-                        addMessageToUI('model', aiResponseText, 'summary_response');
-                    } else {
-                        addMessageToUI('model', 'عذراً، لم أتمكن من توليد ملخص لهذا النص.', 'summary_response');
-                    }
-                } else {
-                    const errorMessage = result.error?.message || 'حدث خطأ غير معروف أثناء الاتصال بخدمة التلخيص.';
-                    addMessageToUI('model', `حدث خطأ في التلخيص: ${errorMessage}`, 'summary_response');
-                }
-
-            } catch (error) {
-                console.error('Gemini Summarization API Error:', error);
-                addMessageToUI('model', `حدث خطأ في الشبكة أو الـ API للتلخيص. (التفاصيل: ${error.message})`, 'summary_response');
-            } finally {
-                 // 3. إخفاء مؤشر الكتابة وحالة التحميل
-                hideTypingIndicator();
-                setLoading(false);
-            }
-        }
-
-
-        // ------------------------------------------------
-        // وظيفة إنشاء أسئلة الاختبار 
-        // ------------------------------------------------
-        async function generateQuizQuestions() {
-            const textForQuiz = userInput.value.trim();
-            
-            if (textForQuiz.length < 100 || isLoading) {
-                const errorMsg = textForQuiz.length < 100 ? 
-                                 'لإنشاء أسئلة اختبار مفيدة، يرجى لصق نص دراسي لا يقل عن 100 حرف.' :
-                                 'النظام مشغول حالياً، يرجى الانتظار.';
-                                 
-                addMessageToUI('model', errorMsg, 'quiz_response');
-                return;
-            }
-
-            // 1. إضافة النص المدخل
-            addMessageToUI('user', textForQuiz, 'quiz_request');
-            
-            // مسح حقل الإدخال وإعادة تعيين حجمه
-            userInput.value = '';
-            resizeInput();
-            
-            // 2. تفعيل حالة التحميل وإظهار مؤشر الكتابة
-            setLoading(true, 'Rsbalo-رسبالو يُنشئ اختباراً...');
-            showTypingIndicator();
-
-
-            // إرسال طلب إنشاء الاختبار كاستعلام جديد
-            const userQuery = `من النص التالي، قم بإنشاء 3 أسئلة اختبار متنوعة (سؤال واحد اختيار من متعدد، سؤال واحد صواب/خطأ، وسؤال واحد إجابة قصيرة). يجب أن تكون الأسئلة مباشرة وتختبر الفهم الأساسي للمادة. ضع كل سؤال وإجابته في تنسيق Markdown سهل القراءة. النص: ${textForQuiz}`;
-            
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: userQuery }] }],
-                systemInstruction: {
-                    parts: [{ text: "أنت خبير في إنشاء أسئلة الاختبار الأكاديمية. قم بتوليد 3 أسئلة متنوعة (MCQ، True/False، Short Answer) مع الإجابات النموذجية لكل سؤال، اعتماداً على النص المُدخل. استخدم تنسيق Markdown واضح (قوائم مرقمة، خط غليظ) ولا تتجاوز الردود الإجابات المطلوبة." }]
-                },
-            };
-
-            const options = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            };
-
-            try {
-                const response = await exponentialBackoffFetch(chatApiUrl, options);
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0) {
-                    const aiResponseText = result.candidates[0].content?.parts?.[0]?.text;
-
-                    if (aiResponseText) {
-                        addMessageToUI('model', aiResponseText, 'quiz_response');
-                    } else {
-                        addMessageToUI('model', 'عذراً، لم أتمكن من إنشاء أسئلة الاختبار من هذا النص.', 'quiz_response');
-                    }
-                } else {
-                    const errorMessage = result.error?.message || 'حدث خطأ غير معروف أثناء الاتصال بخدمة إنشاء الاختبار.';
-                    addMessageToUI('model', `حدث خطأ في إنشاء الاختبار: ${errorMessage}`, 'quiz_response');
-                }
-
-            } catch (error) {
-                console.error('Gemini Quiz API Error:', error);
-                addMessageToUI('model', `حدث خطأ في الشبكة أو الـ API لإنشاء الاختبار. (التفاصيل: ${error.message})`, 'quiz_response');
-            } finally {
-                 // 3. إخفاء مؤشر الكتابة وحالة التحميل
-                hideTypingIndicator();
-                setLoading(false);
-            }
-        }
-
-        // ------------------------------------------------
-        // وظائف إدارة القائمة المنسدلة (الزر المطور)
-        // ------------------------------------------------
-
-        /**
-         * تبديل إظهار وإخفاء القائمة المنسدلة للأدوات.
-         */
-        function toggleToolsMenu() {
-            toolsMenu.classList.toggle('hidden');
-            // إذا ظهرت القائمة، نراقب النقر خارجها لإخفائها
-            if (!toolsMenu.classList.contains('hidden')) {
-                document.addEventListener('click', handleOutsideClick);
-            } else {
-                document.removeEventListener('click', handleOutsideClick);
-            }
-        }
-
-        /**
-         * إغلاق القائمة عند النقر خارجها.
-         */
-        function handleOutsideClick(event) {
-            const container = document.getElementById('tools-dropdown-container');
-            if (!container.contains(event.target)) {
-                toolsMenu.classList.add('hidden');
-                document.removeEventListener('click', handleOutsideClick);
-            }
-        }
-
-        // ------------------------------------------------
-        // معالجة الأحداث
-        // ------------------------------------------------
-        
-        // ربط زر الأدوات الجديد بتبديل القائمة
-        toolsToggleButton.addEventListener('click', (e) => {
-            e.stopPropagation(); // منع إغلاق القائمة فوراً بسبب event bubbling
-            toggleToolsMenu();
-        });
-
-        // ربط خيارات القائمة بالوظائف
-        summarizeOption.addEventListener('click', () => {
-            toolsMenu.classList.add('hidden'); // إخفاء القائمة بعد الاختيار
-            summarizeText();
-        });
-
-        quizOption.addEventListener('click', () => {
-            toolsMenu.classList.add('hidden'); // إخفاء القائمة بعد الاختيار
-            generateQuizQuestions();
-        });
-
-        // الإرسال عند النقر على الزر (الدردشة)
-        sendButton.addEventListener('click', sendMessage);
-        
-        // الإرسال عند الضغط على Enter (للدردشة فقط)
-        userInput.addEventListener('keypress', function(e) {
-            // يتم الإرسال إذا ضغط المستخدم على Enter ولم يضغط Shift (عادة لإضافة سطر جديد)
-            if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-                e.preventDefault(); // منع الإضافة إلى سطر جديد
-                sendMessage();
-            }
-        });
-        
-        // التركيز الأولي وتحديد حجم الحقل
-        window.onload = () => {
-             userInput.focus();
-             resizeInput(); // التأكد من أن الحجم صحيح عند التحميل
-             if (typeof setLogLevel === 'function') {
-                 setLogLevel('Debug');
-             }
-             // تحديث رسالة الترحيب في حال كانت موجودة لتظهر زر TTS
-             const initialWelcomeMessage = document.querySelector('.ai-message-row .message-content p');
-             if (initialWelcomeMessage) {
-                 const text = initialWelcomeMessage.textContent;
-                 // إضافة زر النطق لرسالة الترحيب الأولية يدوياً
-                 const ttsButtonContainer = initialWelcomeMessage.nextElementSibling || document.createElement('div');
-                 if (!initialWelcomeMessage.nextElementSibling) {
-                    ttsButtonContainer.className = 'mt-3 pt-3 border-t border-gray-300';
-                    initialWelcomeMessage.parentNode.appendChild(ttsButtonContainer);
-                 }
-
-                 const ttsButton = ttsButtonContainer.querySelector('#tts-play-button') || document.createElement('button');
-                 if (!ttsButtonContainer.querySelector('#tts-play-button')) {
-                    ttsButton.id = 'tts-play-button';
-                    ttsButton.className = 'bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-1 px-3 rounded-lg transition duration-200 shadow-md flex items-center rtl:flex-row-reverse disabled:opacity-50';
-                    ttsButton.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-2 rtl:mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636A9 9 0 0112 2.25C6.901 2.25 2.65 6.004 2.222 11.02a.75.75 0 00.776.985A14.914 14.914 0 0012 14.25c2.404 0 4.707-.66 6.745-1.898a.75.75 0 00.569-.643c.125-.972.338-1.928.6-2.862.333-1.168.514-2.333.514-3.513zm-9.011 3.228a.75.75 0 00-1.06 1.06L10.94 13.5l-2.887 2.887a.75.75 0 101.06 1.06L12 14.56l2.887 2.887a.75.75 0 101.06-1.06L13.06 13.5l2.887-2.887a.75.75 0 10-1.06-1.06L12 12.44l-2.887-2.887z" />
-                        </svg>
-                        <span class="font-medium">النطق الصوتي</span>
-                    `;
-                    ttsButton.addEventListener('click', () => {
-                        const allTtsButtons = document.querySelectorAll('#tts-play-button');
-                        allTtsButtons.forEach(btn => btn.disabled = true);
-                        readMessageAloud(text, ttsButton);
+            const maxRetries = 5;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    // استخدام API_URL الذي تم تحديثه بمفتاح المستخدم
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
-                    ttsButtonContainer.appendChild(ttsButton);
-                 }
-                 ttsButton.disabled = false; // تفعيل الزر بعد الانتهاء
-             }
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                    }
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (!candidate) {
+                        throw new Error('API returned no candidate response.');
+                    }
+
+                    const parts = candidate.content?.parts;
+                    let text = '';
+
+                    if (parts && parts.length > 0) {
+                        text = parts[0].text || '';
+                    }
+
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions;
+                    }
+
+                    // 3. إزالة رسالة التحميل وإضافة الاستجابة النهائية
+                    const chatHistory = document.getElementById('chat-history');
+                    // إزالة آخر رسالة (التي هي رسالة التحميل)
+                    if (chatHistory.lastChild) {
+                         chatHistory.removeChild(chatHistory.lastChild); 
+                    }
+                   
+                    appendMessage('ai', text, sources);
+
+                    return; // نجاح، نخرج من حلقة المحاولة
+
+                } catch (error) {
+                    console.error("Fetch attempt failed:", error);
+                    
+                    if (error.message.includes('429') || error.message.includes('50') || attempt === maxRetries - 1) {
+                        // إزالة رسالة التحميل
+                        const chatHistory = document.getElementById('chat-history');
+                        if (chatHistory.lastChild) {
+                             chatHistory.removeChild(chatHistory.lastChild); 
+                        }
+
+                        const errorText = 'عذراً، واجه ريسبالو AI خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى.';
+                        errorMessage.textContent = `رسالة الخطأ التقنية: ${error.message}.`;
+                        errorMessage.classList.remove('hidden');
+                        appendMessage('ai', errorText, []);
+                        return;
+                    }
+
+                    // تطبيق التأخير الأسي (Exponential Backoff)
+                    const delay = Math.pow(2, attempt) * 1000 + (Math.random() * 1000);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+        }
+
+        // تشغيل العملية عند الضغط على Enter (ما لم يتم الضغط على Shift)
+        promptInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !promptInput.disabled) {
+                event.preventDefault();
+                processPrompt();
+            }
+        });
+        
+        // الإعداد الأولي للصفحة
+        window.onload = () => {
+            // تعطيل المحادثة في البداية
+            updateChatUI(false); 
+            // تطبيق دالة تغيير الحجم عند التحميل الأولي
+            autoResizeTextarea();
+            console.log('Respaló AI is ready! Awaiting API Key.');
         };
 
     </script>
 </body>
 </html>
-
-

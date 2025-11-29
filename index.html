@@ -6,6 +6,17 @@
     <title>ريسبالو AI - المدرس الذكي (بذاكرة قوية)</title>
     <!-- تضمين Tailwind CSS للحصول على تصميم عصري ومتجاوب --><script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ********** إضافة مكتبات KaTeX و Marked.js بشكل ثابت لتجنب أخطاء التحميل ********** -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" xintegrity="sha384-GvrDXHqNoo5G7vu2T9LFr2IDL6Ew+PmLW+uHzLyWzHcmxoEw/bzMIh0+c9M3wKB7G" crossorigin="anonymous">
+    <!-- تحميل مكتبة KaTeX الرئيسية (يجب أن يكون أولاً) -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <!-- تحميل مكتبة auto-render (يجب أن يكون ثانياً ويعتمد على KaTeX) -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    
+    <!-- تحميل Marked.js لتحويل Markdown -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.17/marked.min.js'></script>
+    
     <style>
         /* الخط الرئيسي: القاهرة - مناسب للغة العربية */
         body {
@@ -15,20 +26,20 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* التركيز على الجزء العلوي من المحتوى */
-            padding: 0; /* إزالة الـ padding من الجسم */
-            margin: 0; /* إزالة الـ margin من الجسم */
+            align-items: flex-start;
+            padding: 0;
+            margin: 0;
         }
         /* تلوين الخلفية والظلال للمنطقة الرئيسية لتملأ العرض */
         .ai-container {
             background-color: #ffffff;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-            /* استخدام ارتفاع وعرض كاملين للهاتف وشبه كاملين للديسكتوب */
             width: 100%;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            max-width: 1200px; /* تحديد أقصى عرض على الشاشات الكبيرة */
+            max-width: 1200px;
+            position: relative; /* مهم للزر العائم */
         }
         
         /* تصميم زر الإرسال */
@@ -71,20 +82,25 @@
         .ai-bubble-content pre { background-color: #1f2937; color: #f9fafb; padding: 1.25rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1rem; }
         .ai-bubble-content blockquote { border-right: 4px solid #f97316; padding-right: 1rem; margin-right: 1rem; color: #4b5563; font-style: italic; background-color: #fffbeb; padding-top: 0.5rem; padding-bottom: 0.5rem; border-radius: 4px; }
         
+        /* تنسيق خاص لمعادلات KaTeX لضمان محاذاة النص العربي */
+        .katex-display {
+            text-align: right !important; /* محاذاة المعادلات المنفصلة لليمين */
+        }
+        
         /* تعديل خاص بمنطقة الإدخال لتبدو أكثر إحكاماً وكمربع محادثة */
         #prompt-input {
-            min-height: 56px; /* ارتفاع أدنى لتبدو كصف واحد */
-            max-height: 200px; /* تحديد أقصى ارتفاع */
-            overflow-y: auto; /* السماح بالتمرير إذا تجاوز الحد الأقصى */
-            resize: none; /* منع تغيير حجمها يدوياً */
-            padding-left: 60px; /* مساحة لزر الإرسال في اليسار */
-            padding-right: 16px; /* مساحة مناسبة للكتابة في اليمين */
+            min-height: 56px;
+            max-height: 200px;
+            overflow-y: auto;
+            resize: none;
+            padding-left: 60px;
+            padding-right: 16px;
         }
         
         /* تخصيص زر الإرسال ليكون في أقصى اليسار داخل مربع النص */
         #submit-btn {
             left: 12px;
-            right: auto; /* إلغاء الـ RTL positioning */
+            right: auto;
         }
 
         /* توقيع "هرياسور" */
@@ -98,7 +114,7 @@
 
         /* منطقة المحادثة تأخذ المساحة المتاحة كاملة */
         #chat-history {
-            flex-grow: 1; /* يسمح لها بالتمدد لأقصى حد في الارتفاع */
+            flex-grow: 1;
             overflow-y: auto;
             padding-top: 1.5rem;
             padding-bottom: 1.5rem;
@@ -110,6 +126,57 @@
             padding: 1rem 1.5rem;
             border-bottom: 1px solid #f3f4f6;
             background-color: #f9fafb;
+        }
+        
+        /* ******* تنسيق الأدوات الجديدة (Sidebar and FAB) ******* */
+        #tools-fab {
+            position: fixed;
+            top: 50%; /* في منتصف ارتفاع الصفحة */
+            right: 20px; /* 20px من اليمين (على الجنب) */
+            transform: translateY(-50%); /* إزاحة للأعلى بنصف ارتفاعه ليتمركز عمودياً */
+            left: auto; /* إلغاء خاصية اليسار السابقة */
+            z-index: 30; /* فوق كل شيء ما عدا الشريط الجانبي نفسه */
+            width: 56px;
+            height: 56px;
+            background-color: #f97316; /* برتقالي جذاب */
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.6);
+        }
+        
+        #tools-fab:hover {
+            background-color: #ea580c;
+        }
+
+        #tools-sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            /* الشريط الجانبي على اليمين في RTL */
+            right: 0; 
+            left: auto;
+            z-index: 50;
+            width: 100%;
+            max-width: 400px; /* عرض مناسب على الديسكتوب */
+            transform: translateX(100%); /* إخفاء مبدئي */
+            transition: transform 0.3s ease-in-out;
+            border-left: 1px solid #e5e7eb;
+            overflow-y: auto;
+        }
+        /* على الشاشات الصغيرة، يمكن أن يملأ الـ Sidebar العرض */
+        @media (max-width: 640px) {
+            #tools-sidebar {
+                max-width: 100%; 
+            }
+        }
+
+        #tools-sidebar.open {
+            transform: translateX(0); /* إظهار */
+        }
+
+        .tool-box {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -145,15 +212,64 @@
             <!-- الرسائل ستظهر هنا بواسطة JavaScript -->
         </div>
 
+        <!-- ******* زر الأدوات العائم (القلم المدور) ******* -->
+        <button id="tools-fab" 
+                class="rounded-full flex items-center justify-center text-white transition duration-200 shadow-2xl" 
+                onclick="toggleSidebar()" 
+                title="أدوات ريسبالو"
+                disabled>
+            <!-- أيقونة القلم -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+        </button>
+
+        <!-- ******* لوحة الأدوات الجانبية (Sidebar) ******* -->
+        <div id="tools-sidebar" class="bg-gray-50 flex flex-col p-6 space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-3xl font-extrabold text-teal-700 border-b-4 border-teal-400 pb-1">أدوات ريسبالو</h2>
+                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-900 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- أداة تلخيص الدرس -->
+            <div class="tool-box border-2 border-teal-300">
+                <h3 class="text-xl font-bold text-teal-800 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    1. تلخيص درس (Summarizer)
+                </h3>
+                <textarea id="summary-input" rows="6" placeholder="ألصق هنا النص الطويل أو الدرس الذي تريد تلخيصه..." class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500 resize-none text-sm"></textarea>
+                <button id="summarize-btn" onclick="handleSummary()" class="w-full mt-3 py-3 rounded-xl text-white font-bold bg-teal-600 hover:bg-teal-700 transition disabled:bg-gray-400">
+                    لخّص الدرس الآن! ✍️
+                </button>
+            </div>
+
+            <!-- أداة الامتحان اللا نهائي -->
+            <div class="tool-box border-2 border-orange-300">
+                <h3 class="text-xl font-bold text-orange-800 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0v5h5" /></svg>
+                    2. امتحان ما لا نهائي (Quiz)
+                </h3>
+                <textarea id="quiz-input" rows="6" placeholder="ألصق هنا المادة التعليمية أو المفاهيم التي تريد أن أختبرك بها..." class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 resize-none text-sm"></textarea>
+                <button id="quiz-btn" onclick="handleQuiz()" class="w-full mt-3 py-3 rounded-xl text-white font-bold bg-orange-600 hover:bg-orange-700 transition disabled:bg-gray-400">
+                    ابدأ الامتحان الآن! 🧠
+                </button>
+            </div>
+        </div>
+        <!-- نهاية لوحة الأدوات الجانبية -->
+
         <!-- ******* منطقة الإدخال المحدثة والمدمجة (Bottom Bar) ******* -->
         <div class="p-4 border-t border-gray-200 bg-white sticky bottom-0 w-full">
             <div class="relative max-w-3xl mx-auto">
                 <textarea id="prompt-input" 
-                          rows="1" 
-                          class="w-full p-4 pr-4 pl-16 text-gray-800 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-teal-500 focus:border-teal-500 transition duration-150 shadow-lg" 
-                          placeholder="اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا..." 
-                          disabled 
-                          oninput="autoResizeTextarea()"></textarea>
+                            rows="1" 
+                            class="w-full p-4 pr-4 pl-16 text-gray-800 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-teal-500 focus:border-teal-500 transition duration-150 shadow-lg" 
+                            placeholder="اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا..." 
+                            disabled 
+                            oninput="autoResizeTextarea()"></textarea>
                 
                 <!-- زر الإرسال داخل الحقل (سهم صاعد) -->
                 <button id="submit-btn" 
@@ -188,6 +304,8 @@
         const submitBtn = document.getElementById('submit-btn');
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorMessage = document.getElementById('error-message');
+        const toolsFab = document.getElementById('tools-fab');
+        const toolsSidebar = document.getElementById('tools-sidebar');
         
         // عناصر مفتاح API الجديدة
         const apiKeyInput = document.getElementById('api-key-input');
@@ -196,6 +314,12 @@
         const apiKeySetupDiv = document.getElementById('api-key-setup');
         const sendIcon = document.getElementById('send-icon'); 
         const chatHistory = document.getElementById('chat-history');
+
+        // عناصر الأدوات الجديدة
+        const summaryInput = document.getElementById('summary-input');
+        const summarizeBtn = document.getElementById('summarize-btn');
+        const quizInput = document.getElementById('quiz-input');
+        const quizBtn = document.getElementById('quiz-btn');
 
         // مصفوفة لتخزين سجل المحادثة الكامل (مهم جداً للذاكرة)
         let conversationHistory = []; 
@@ -206,18 +330,35 @@
         const systemPrompt = "يا صاحبي، أنت دلوقتي 'ريسبالو AI'، مدرسك الجامد اللي مالوش مثيل! شخصيتك مرحة ودمك خفيف جداً (funny/lighthearted)، ودائماً بتبتسم وبتستخدم إيموجي. الشرح بتاعك لازم يكون 'بالبلدي' وبطريقة حوارية سهلة وممتعة. ممنوع منعاً باتاً تستخدم أي لغة عربية فصحى قديمة أو معقدة. لازم تكون **ذكي جداً ومنظم جداً** في الإجابة: ابدأ بملخص سريع، ثم قسّم الشرح إلى **عناوين فرعية واضحة** (باستخدام ## أو ###)، **نقاط مرقمة أو قوائم بوليت** (باستخدام * أو -)، واستخدم **الـ Markdown بشكل أنيق** لترتيب الإجابة، ونسق النصوص الطويلة في فقرات قصيرة. يجب أن يكون الشرح عميقاً ومُتقناً. استخدم خاصية البحث للوصول لأحدث المعلومات. تذكر دايماً إنك أحسن من أي مدرس تقليدي بمليار تريليون مرة! **والأهم:** أنت الآن تحتفظ بسجل المحادثة بالكامل، لذلك يجب أن تكون دائماً على علم بالسياق الذي يتحدث عنه المستخدم. إذا طلب منك تكرار أو شرح نقطة من الرسالة السابقة، افهمها فوراً وجاوب بناءً على السياق.";
 
         /**
-         * تحديث واجهة المستخدم (UI) لتمكين أو تعطيل المحادثة.
+         * تحديث واجهة المستخدم (UI) لتمكين أو تعطيل المحادثة والأدوات.
          * @param {boolean} isEnabled - True للتمكين، False للتعطيل.
          */
         function updateChatUI(isEnabled) {
             promptInput.disabled = !isEnabled;
             submitBtn.disabled = !isEnabled;
+            toolsFab.disabled = !isEnabled;
+            summarizeBtn.disabled = !isEnabled;
+            quizBtn.disabled = !isEnabled;
+
             if (isEnabled) {
                 promptInput.placeholder = 'اكتب سؤالك، مهمتك، أو أي استفسار تريده هنا... (اضغط Enter للإرسال)';
                 apiKeySetupDiv.classList.add('hidden'); // إخفاء مربع إدخال المفتاح
             } else {
                 promptInput.placeholder = 'يرجى إدخال مفتاح API أولاً لتفعيل المحادثة.';
+                toolsSidebar.classList.remove('open'); // إخفاء الشريط الجانبي إذا لم يكن هناك مفتاح
             }
+        }
+        
+        /**
+         * تبديل حالة الشريط الجانبي (فتحه أو إغلاقه).
+         */
+        function toggleSidebar() {
+            if (!API_KEY_USER) {
+                 // عرض رسالة خطأ قصيرة داخل الدردشة
+                appendMessage('ai', 'يا صاحبي، لازم تحط مفتاح API الأول عشان تعرف تستخدم الأدوات! 🛑');
+                return;
+            }
+            toolsSidebar.classList.toggle('open');
         }
 
         /**
@@ -248,11 +389,8 @@
         function appendWelcomeMessage() {
             // التحقق من عدم وجود رسائل سابقة لتجنب التكرار
             if (conversationHistory.length === 0) {
-                const welcomeText = 'يا هلا بيك يا صاحبي! 😉 أنا ريسبالو AI، مدرسك الخاص اللي دمه خفيف ومرتب في الشرح. أسألني أي سؤال في دماغك، وهتلاقيني بجاوبك بإتقان ومنظم لك الإجابة أحسن تنظيم! إزاي أقدر أساعدك دلوقتي؟';
+                const welcomeText = 'يا هلا بيك يا صاحبي! 😉 أنا ريسبالو AI، مدرسك الخاص اللي دمه خفيف ومرتب في الشرح. أسألني أي سؤال في دماغك، وهتلاقيني بجاوبك بإتقان ومنظم لك الإجابة أحسن تنظيم! ولو عايز أدوات قوية زي "الملخص" أو "الامتحان"، اضغط على زر **القلم البرتقالي العائم** اللي على اليمين! إزاي أقدر أساعدك دلوقتي؟';
                 appendMessage('ai', welcomeText);
-                
-                // إضافة الرسالة الترحيبية لسجل المحادثة (على الرغم من أنها ليست رد نموذج، فهي تحدد نغمة المحادثة)
-                // في هذا التصميم، نفضل عدم إضافتها لسجل الـ API لتبدأ المحادثة بسؤال المستخدم
             }
         }
 
@@ -329,9 +467,36 @@
             // منطقة المحتوى لتطبيق تنسيقات Markdown
             const content = document.createElement('div');
             content.className = `${isUser ? '' : 'ai-bubble-content'} whitespace-pre-wrap leading-relaxed text-right`;
-            content.innerHTML = marked.parse(text); // استخدام marked.js لتحويل Markdown إلى HTML
+            
+            // استخدام marked.js لتحويل Markdown إلى HTML
+            content.innerHTML = marked.parse(text); 
+            
             bubble.appendChild(content);
 
+            // *** إضافة KaTeX لترجمة معادلات LaTeX ***
+            if (!isUser) {
+                try {
+                    // نتحقق من وجود الدالة قبل استدعائها لمنع الأخطاء أثناء التحميل
+                    if (typeof renderMathInElement === 'function') {
+                        // استخدام دالة KaTeX auto-render لترجمة الأكواد الرياضية في المحتوى
+                        renderMathInElement(content, {
+                            // تحديد علامات البدء والنهاية لأكواد LaTeX
+                            delimiters: [
+                                { left: "$$", right: "$$", display: true }, // وضع العرض المنفصل
+                                { left: "$", right: "$", display: false },   // الوضع داخل السطر
+                            ],
+                            // يسمح بعرض الأكواد حتى لو كان بها خطأ بسيط
+                            throwOnError: false
+                        });
+                    } else {
+                        console.warn("KaTeX auto-render function is not defined. Math rendering skipped.");
+                    }
+                } catch (e) {
+                    // نلتقط الخطأ ونمنع انهيار التطبيق، مع تسجيل الخطأ في الكونسول
+                    console.error("KaTeX rendering failed (ParseError likely due to timing or dependency issue):", e);
+                }
+            }
+            
             // المصادر (لـ AI فقط)
             if (!isUser && sources.length > 0) {
                 const sourcesDiv = document.createElement('div');
@@ -348,7 +513,6 @@
                     sourceLink.target = "_blank";
                     sourceLink.className = "source-item block hover:text-teal-600 hover:underline truncate";
                     sourceLink.textContent = `• ${attr.web.title}`;
-                    listItem.appendChild(sourceLink);
                     sourcesList.appendChild(listItem);
                 });
                 sourcesDiv.appendChild(sourcesList);
@@ -385,6 +549,10 @@
         function setLoadingState(isLoading) {
             submitBtn.disabled = isLoading;
             promptInput.disabled = isLoading;
+            toolsFab.disabled = isLoading;
+            summarizeBtn.disabled = isLoading;
+            quizBtn.disabled = isLoading;
+            
             if (isLoading) {
                 sendIcon.classList.add('hidden');
                 loadingSpinner.classList.remove('hidden');
@@ -467,9 +635,9 @@
 
                     // 3. إزالة رسالة التحميل
                     if (loadingMessageDiv && loadingMessageDiv.parentNode) {
-                         loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
+                            loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
                     }
-                   
+                    
                     // 4. إضافة الاستجابة النهائية لسجل المحادثة المحلية والـ API
                     appendMessage('ai', text, sources);
                     conversationHistory.push({ role: "model", parts: [{ text: text }] });
@@ -482,7 +650,7 @@
                     if (error.message.includes('429') || error.message.includes('50') || attempt === maxRetries - 1) {
                         // إزالة رسالة التحميل وإضافة رسالة خطأ نهائية
                         if (loadingMessageDiv && loadingMessageDiv.parentNode) {
-                             loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
+                            loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
                         }
 
                         const errorText = 'يااااه، للأسف واجهت مشكلة في الاتصال أو الضغط عليّا زاد حبتين! حاول تبعت السؤال تاني أو تتأكد من مفتاح API. 😥';
@@ -490,6 +658,157 @@
                         errorMessage.classList.remove('hidden');
                         appendMessage('ai', errorText, []);
                         // لا نضيف رسالة الخطأ هذه لسجل المحادثة API
+                        return;
+                    }
+
+                    // تطبيق التأخير الأسي (Exponential Backoff)
+                    const delay = Math.pow(2, attempt) * 1000 + (Math.random() * 500);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+        }
+        
+        /**
+         * دالة معالجة التلخيص (Summary Tool).
+         */
+        async function handleSummary() {
+            if (!API_KEY_USER) {
+                appendMessage('ai', 'يا صاحبي، لازم تحط مفتاح API الأول عشان تعرف تستخدم الأدوات! 🛑');
+                return;
+            }
+
+            const textToSummarize = summaryInput.value.trim();
+            if (textToSummarize.length < 50) {
+                appendMessage('ai', 'النص قصير جداً! عشان أعمل ملخص مفيد، حط لي درس أو نص لا يقل عن ٥٠ كلمة. 🧐');
+                return;
+            }
+
+            toggleSidebar(); // إخفاء الشريط الجانبي بعد الإرسال
+            summaryInput.value = ''; // مسح حقل الإدخال
+            
+            const summarySystemPrompt = "أنت خبير في التلخيص والتحليل. مهمتك هي قراءة النص المقدم بعناية وتلخيصه في نقاط رئيسية منظمة وبلغة عربية فصيحة ولكن سلسة، بحيث لا يتجاوز الملخص 200 كلمة. ابدأ برد حماسي ومرح.";
+            const toolUserQuery = `ملخص للنص التالي: \n\n ${textToSummarize}`;
+
+            // 1. إضافة رسالة المستخدم (الأداة)
+            appendMessage('user', `**طلب تلخيص:** تم إرسال نص للتلخيص (يحتوي على ${textToSummarize.length} حرف).`);
+            
+            // 2. إضافة رسالة التحميل (Placeholder)
+            appendMessage('ai', 'جاري التلخيص والتحليل، شغلانة مش سهلة! 🤓', []);
+            const loadingMessageDiv = chatHistory.lastChild;
+
+            setLoadingState(true);
+
+            // Payload خاص بالأداة (لا يتضمن سجل المحادثة الطويل لتجنب التشويش على مهمة التلخيص)
+            const toolPayload = {
+                contents: [{ role: "user", parts: [{ text: toolUserQuery }] }],
+                systemInstruction: { parts: [{ text: summarySystemPrompt }] }
+            };
+
+            await performToolRequest(toolPayload, loadingMessageDiv, toolUserQuery, true);
+        }
+
+        /**
+         * دالة معالجة الاختبار اللانهائي (Quiz Tool).
+         */
+        async function handleQuiz() {
+            if (!API_KEY_USER) {
+                appendMessage('ai', 'يا صاحبي، لازم تحط مفتاح API الأول عشان تعرف تستخدم الأدوات! 🛑');
+                return;
+            }
+
+            const quizContent = quizInput.value.trim();
+            if (quizContent.length < 50) {
+                appendMessage('ai', 'مادة الاختبار قصيرة جداً! عشان أعملك امتحان جامد، حط لي محتوى لا يقل عن ٥٠ كلمة. 🧠');
+                return;
+            }
+
+            toggleSidebar(); // إخفاء الشريط الجانبي بعد الإرسال
+            quizInput.value = ''; // مسح حقل الإدخال
+
+            const quizSystemPrompt = "أنت الآن مُنشئ اختبارات لا نهائية. مهمتك هي قراءة النص التعليمي المقدم بعناية، ثم البدء فوراً بسؤال المستخدم عن السؤال الأول (Q1). يجب أن تطلب منه الإجابة. بعد كل إجابة صحيحة، انتقل إلى السؤال التالي. إذا أخطأ، قم بتصحيح المعلومة بلطف ثم عد لنفس السؤال بطريقة مختلفة. يجب أن تكون الأسئلة متنوعة وتغطي جميع جوانب النص. استمر في طرح الأسئلة حتى يطلب المستخدم التوقف. ردودك يجب أن تكون مرحة ومشجعة.";
+            const toolUserQuery = `النص الذي يجب أن تعقد عليه اختباراً لا نهائياً هو:\n\n ${quizContent}`;
+
+            // 1. إضافة رسالة المستخدم (الأداة)
+            appendMessage('user', `**طلب امتحان لا نهائي:** تم إرسال محتوى للاختبار (يحتوي على ${quizContent.length} حرف).`);
+
+            // 2. إضافة رسالة التحميل (Placeholder)
+            appendMessage('ai', 'بجهز أول سؤال ليك! شد حيلك يا بطل! 💪', []);
+            const loadingMessageDiv = chatHistory.lastChild;
+
+            setLoadingState(true);
+
+            // Payload خاص بالأداة (يستخدم النظام والبيانات لبدء الاختبار)
+            const toolPayload = {
+                contents: [{ role: "user", parts: [{ text: toolUserQuery }] }],
+                systemInstruction: { parts: [{ text: quizSystemPrompt }] }
+            };
+
+            // نستخدم دالة الطلب المشتركة ونضيف الرد لسجل المحادثة الرئيسي لمتابعة الاختبار
+            await performToolRequest(toolPayload, loadingMessageDiv, toolUserQuery, true);
+        }
+
+        /**
+         * دالة مشتركة لأداء طلب API لأدوات Sidebar.
+         * @param {object} payload - حمولة الـ API.
+         * @param {HTMLElement} loadingMessageDiv - رسالة التحميل المراد حذفها.
+         * @param {string} initialQuery - الاستعلام الأولي (لإضافته لسجل المحادثة).
+         * @param {boolean} updateMainHistory - هل يجب إضافة الرد لسجل المحادثة الرئيسي؟
+         */
+        async function performToolRequest(payload, loadingMessageDiv, initialQuery, updateMainHistory) {
+            const maxRetries = 5;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                    }
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (!candidate) {
+                        throw new Error('API returned no candidate response.');
+                    }
+
+                    const parts = candidate.content?.parts;
+                    let text = parts && parts.length > 0 ? parts[0].text || '' : 'معلش يا صاحبي، حصلت لخبطة في الإجابة، مش عارف أركّبها صح دلوقتي! 🤦‍♂️';
+
+                    // 3. إزالة رسالة التحميل
+                    if (loadingMessageDiv && loadingMessageDiv.parentNode) {
+                            loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
+                    }
+                    
+                    // 4. إضافة الاستجابة النهائية لسجل المحادثة المحلية والـ API
+                    appendMessage('ai', text, []); // الأدوات لا تستخدم بحث جوجل، لذا لا توجد مصادر
+
+                    if (updateMainHistory) {
+                        // بما أننا استخدمنا أدوات، يجب إضافة الاستعلام والرد الناتجين عن الأداة إلى سجل المحادثة العام للحفاظ على السياق
+                        // الاستعلام الأولي للمستخدم (الأداة) لا يُضاف، فقط الاستجابة الأولية للموديل
+                        conversationHistory.push({ role: "model", parts: [{ text: text }] });
+                    }
+
+                    return; // نجاح
+
+                } catch (error) {
+                    console.error("Fetch attempt failed:", error);
+                    
+                    if (error.message.includes('429') || error.message.includes('50') || attempt === maxRetries - 1) {
+                        // إزالة رسالة التحميل وإضافة رسالة خطأ نهائية
+                        if (loadingMessageDiv && loadingMessageDiv.parentNode) {
+                            loadingMessageDiv.parentNode.removeChild(loadingMessageDiv); 
+                        }
+
+                        const errorText = 'يااااه، للأسف واجهت مشكلة في الاتصال أو الضغط عليّا زاد حبتين! حاول تبعت السؤال تاني أو تتأكد من مفتاح API. 😥';
+                        errorMessage.textContent = `رسالة الخطأ التقنية: ${error.message}.`;
+                        errorMessage.classList.remove('hidden');
+                        appendMessage('ai', errorText, []);
                         return;
                     }
 
@@ -510,11 +829,6 @@
             }
         });
         
-        // تحميل marked.js لتحويل Markdown إلى HTML
-        const markedScript = document.createElement('script');
-        markedScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.17/marked.min.js';
-        document.head.appendChild(markedScript);
-
         // الإعداد الأولي للصفحة
         window.onload = () => {
             updateChatUI(false); 
